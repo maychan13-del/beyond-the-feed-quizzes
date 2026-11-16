@@ -95,7 +95,7 @@
   .scenario{background:var(--sand); border-radius:16px; padding:11px 13px; margin:9px 0; font-weight:500; font-size:14px; border-left:7px solid var(--blue)}
   .post{background:var(--cream); border:2px solid var(--navy); border-radius:13px; padding:8px 11px; margin:7px 0 2px; font-weight:600; color:var(--navy)}
   .case{border:3px solid var(--blue); border-radius:18px; margin:9px 0; overflow:hidden; background:var(--sand)}
-  .case-head{background:var(--navy); color:var(--white); padding:5px 13px; text-transform:uppercase; letter-spacing:.1em; font-size:11px; display:flex; justify-content:space-between; gap:6px}
+  .case-head{background:var(--navy); color:var(--white); padding:5px 13px; text-transform:uppercase; letter-spacing:.1em; font-size:11px; display:flex; justify-content:space-between; gap:6px; white-space:nowrap}
   .case-body{padding:9px 13px; font-weight:500; font-size:13.5px}
   .case-links{display:flex; flex-wrap:wrap; gap:8px; padding:0 13px 11px}
   .link{display:inline-block; background:var(--blue); color:var(--white); text-decoration:none; border-radius:999px; padding:5px 13px; font-size:12.5px}
@@ -405,14 +405,14 @@ const BUILD = {
   },
 
   sort(q, body, ready){
+    const cats = q.cats || [q.yes, q.no];
+    const want = it => (it.cat !== undefined) ? it.cat : (it.ok ? 0 : 1);
     const items = shuffle(q.items); const ans = new Array(items.length).fill(null);
     const box = el('<div class="sort"></div>');
     items.forEach((it,k)=>{
-      const r = el(`<div class="row"><div class="txt">${it.t}</div><div class="togs">
-        <button class="tog" type="button" data-v="1">${q.yes}</button>
-        <button class="tog" type="button" data-v="0">${q.no}</button></div></div>`);
+      const r = el(`<div class="row"><div class="txt">${it.t}</div><div class="togs">${cats.map((c,v)=>`<button class="tog" type="button" data-v="${v}">${c}</button>`).join('')}</div></div>`);
       r.querySelectorAll('.tog').forEach(t => t.onclick = () => {
-        ans[k] = t.dataset.v === '1';
+        ans[k] = +t.dataset.v;
         r.querySelectorAll('.tog').forEach(x=>x.classList.toggle('sel', x===t));
         ready(ans.every(a=>a!==null));
       });
@@ -421,9 +421,9 @@ const BUILD = {
     body.appendChild(box);
     return () => {
       let wrong = 0;
-      [...box.children].forEach((r,k)=>{ const it = items[k], ok = ans[k]===it.ok; if(!ok) wrong++;
+      [...box.children].forEach((r,k)=>{ const it = items[k], ok = ans[k]===want(it); if(!ok) wrong++;
         r.classList.add(ok?'right':'wrong'); r.querySelectorAll('.tog').forEach(t=>t.disabled=true);
-        r.appendChild(el(`<div class="why"><span class="${ok?'tagok':'tagno'}"><b>${ok?'✓ Correct.':'✗ This one is '+(it.ok?q.yes.toLowerCase():q.no.toLowerCase())+'.'}</b></span> ${it.why}</div>`));
+        r.appendChild(el(`<div class="why"><span class="${ok?'tagok':'tagno'}"><b>${ok?'✓ Correct.':'✗ This one is '+cats[want(it)].toLowerCase()+'.'}</b></span> ${it.why}</div>`));
       });
       return wrong===0
         ? { correct:true, html:`<p>All ${items.length} sorted correctly. ${q.okMsg}</p>` }

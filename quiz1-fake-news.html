@@ -56,7 +56,7 @@
 
   h1.hero{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; color:var(--red);
     font-size:74px; line-height:.95; margin:14px 0 10px; transform:rotate(-3deg); transform-origin:left center}
-  h1.hero.long{font-size:54px}
+  h1.hero.long{font-size:42px}
   h2{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; color:var(--red); font-size:30px; line-height:1.1; margin:6px 0 8px}
   .subtitle{color:var(--gold); font-size:22px; line-height:1.2; margin:8px 0}
   p{margin:8px 0}
@@ -207,6 +207,7 @@ const QUIZ = {
         ]
       },
       q: 'Which clues show that the headline in the image is fake news?',
+      remember: 'the real clues are the ones that show the story is entirely fabricated and made on purpose.',
       hint: 'Select ALL that apply.',
       options: [
         { t: 'CNN confirmed that the headline never appeared on its channel or website.', ok: true,
@@ -226,6 +227,8 @@ const QUIZ = {
       q: 'Is each statement a characteristic of fake news?',
       hint: 'Choose a side for every statement.',
       yes: 'Fake news', no: 'Not fake news',
+      okMsg: 'Fake news is entirely fabricated and made on purpose. Mistakes, misunderstandings and true stories you dislike do not count.',
+      failMsg: 'The test is always the same two questions: Is the whole story invented? Was it made on purpose?',
       items: [
         { t: 'The entire story is invented.', ok: true, why: 'Fake news is entirely fabricated.' },
         { t: 'A real event is reported with the wrong date by mistake.', ok: false, why: 'A real event exists and the error is accidental, so it is neither fully invented nor made on purpose.' },
@@ -397,7 +400,7 @@ const BUILD = {
       const rights = opts.filter(o=>o.ok);
       return allRight
         ? { correct:true, html:`<p>You found every real clue and ignored the distractions.</p><ul>${rights.map(o=>`<li>${o.why}</li>`).join('')}</ul>` }
-        : { correct:false, html:`<ul>${lines.join('')}</ul><p><b>Remember:</b> the real clues are the ones that show the story is entirely fabricated and made on purpose.</p>` };
+        : { correct:false, html:`<ul>${lines.join('')}</ul><p><b>Remember:</b> ${q.remember}</p>` };
     };
   },
 
@@ -423,8 +426,8 @@ const BUILD = {
         r.appendChild(el(`<div class="why"><span class="${ok?'tagok':'tagno'}"><b>${ok?'✓ Correct.':'✗ This one is '+(it.ok?q.yes.toLowerCase():q.no.toLowerCase())+'.'}</b></span> ${it.why}</div>`));
       });
       return wrong===0
-        ? { correct:true, html:`<p>All ${items.length} sorted correctly. Fake news is entirely fabricated and made on purpose. Mistakes, misunderstandings and true stories you dislike do not count.</p>` }
-        : { correct:false, title:`${items.length-wrong} of ${items.length} correct`, html:`<p>Check the explanations under each statement above. The test is always the same two questions: Is the whole story invented? Was it made on purpose?</p>` };
+        ? { correct:true, html:`<p>All ${items.length} sorted correctly. ${q.okMsg}</p>` }
+        : { correct:false, title:`${items.length-wrong} of ${items.length} correct`, html:`<p>Check the explanations under each statement above. ${q.failMsg}</p>` };
     };
   },
 

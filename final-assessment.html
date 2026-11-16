@@ -154,6 +154,17 @@
   .rv .ra{font-weight:500; margin-top:3px}
   .rv b{color:var(--navy)}
   .rv .x{color:var(--red)}
+  .send{margin-top:8px; background:var(--sand); border-radius:14px; padding:9px 11px}
+  .send .tag{display:inline-block; background:var(--mustard); color:var(--navy); border-radius:999px; padding:1px 9px; font-size:10px; text-transform:uppercase; letter-spacing:.1em}
+  .send .st{color:var(--navy); font-size:14px; margin:4px 0 2px}
+  .send .sd{font-weight:500; font-size:12px; margin:0 0 6px}
+  .send input{width:100%; font:inherit; font-size:13px; font-weight:500; padding:6px 10px; border:2px solid var(--navy); border-radius:999px; background:var(--cream); color:var(--black)}
+  .send input:focus{outline:3px solid var(--blue); outline-offset:1px}
+  .send .err{color:var(--red); font-size:12px; margin:4px 0 0; min-height:0}
+  .send .btn{margin-top:7px; padding:7px 18px; font-size:12px}
+  .modal{position:absolute; inset:0; z-index:5; background:rgba(37,74,107,.72); display:grid; place-items:center}
+  .modal .box{width:470px; background:var(--cream); border:3px solid var(--navy); border-radius:22px; box-shadow:7px 7px 0 var(--mustard); padding:22px 24px; text-align:center}
+  .modal .box h2{margin-top:8px}
   @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
 </style>
 </head>
@@ -645,9 +656,17 @@ function aEnd(){
         <div class="main two" style="grid-template-columns:32% 1fr">
           <div class="col left">
             <p class="label">Your score</p>
-            <div class="score">${s}<small> / ${n}</small></div>
-            <h2 style="margin-top:8px">You passed!</h2>
-            <p class="long">${pct}%. You can distinguish the unique characteristics of fake news, misinformation and disinformation.</p>
+            <div class="score" style="font-size:58px">${s}<small> / ${n}</small></div>
+            <h2 style="margin-top:4px; font-size:24px">You passed!</h2>
+            <p class="long" style="font-size:13px">${pct}%. You can distinguish the unique characteristics of fake news, misinformation and disinformation.</p>
+            <div class="send">
+              <span class="tag">Prototype feature</span>
+              <p class="st">Record your result</p>
+              <p class="sd">Enter your email to send your result to May from the HKU De-Bunkers team.</p>
+              <input type="email" id="em" placeholder="Your email address" autocomplete="off" aria-label="Your email address">
+              <p class="err" id="emErr" aria-live="polite"></p>
+              <button class="btn" id="send">Submit</button>
+            </div>
           </div>
           <div class="col right"><p class="label" style="margin-bottom:6px">Review every question</p><div class="review">${items}</div></div>
         </div>
@@ -655,6 +674,23 @@ function aEnd(){
       </section>`;
   }
   document.getElementById('again').onclick = aStart;
+  const send = document.getElementById('send');
+  if(send){
+    send.onclick = () => {
+      const em = document.getElementById('em'), err = document.getElementById('emErr'), v = em.value.trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ err.textContent = 'Please enter a valid email address.'; em.focus(); return; }
+      err.textContent = '';
+      const m = el(`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="mT"><div class="box">
+        <span class="banner">Prototype demo${SPARK}</span>
+        <h2 id="mT">Result submitted!</h2>
+        <p class="long">In the live course, your result (<b>${s}/${n}, ${pct}%</b>) would now be sent to May from the HKU De-Bunkers team, with a copy to your email.</p>
+        <p class="long" style="font-size:13px">This is a design prototype, so no email has been sent and your address has not been stored.</p>
+        <p style="margin-top:12px"><button class="btn navy" id="mClose">Close</button></p></div></div>`);
+      stage.appendChild(m);
+      document.getElementById('mClose').onclick = () => { m.remove(); send.disabled = true; send.textContent = 'Submitted'; em.disabled = true; };
+      document.getElementById('mClose').focus();
+    };
+  }
 }
 
 (QUIZ.mode === 'assessment' ? aStart : renderStart)();

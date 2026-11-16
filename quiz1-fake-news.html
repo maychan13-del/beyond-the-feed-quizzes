@@ -144,6 +144,16 @@
   .fb p,.fb li{font-weight:500; margin:4px 0}
   .fb ul{margin:4px 0 0; padding-left:18px}
   .fb b{font-weight:600; color:var(--navy)}
+
+  /* assessment */
+  .dots.many .dot{width:11px}
+  .review{display:grid; gap:8px}
+  .rv{background:var(--sand); border-radius:14px; padding:8px 12px; border-left:8px solid var(--blue); font-size:13px}
+  .rv.bad{border-left-color:var(--red)}
+  .rv .rq{color:var(--navy); font-size:14px}
+  .rv .ra{font-weight:500; margin-top:3px}
+  .rv b{color:var(--navy)}
+  .rv .x{color:var(--red)}
   @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
 </style>
 </head>
@@ -501,7 +511,117 @@ function renderEnd(){
   document.getElementById('again').onclick = renderStart;
 }
 
-renderStart();
+
+/* ============================ ASSESSMENT MODE ============================ */
+let A = { order: [], picks: [], i: 0 };
+function aOptions(q){
+  if(q.classify !== undefined) return QUIZ.types.map((t,k)=>({ t, ok: k===q.classify }));
+  return shuffle(q.options);
+}
+function aStart(){
+  const n = QUIZ.questions.length, need = Math.ceil(n*QUIZ.passMark);
+  barRight.innerHTML = '';
+  app.innerHTML = `
+    <div class="split">
+      <div>
+        <span class="banner red">Final assessment${SPARK}</span>
+        <h1 class="hero long">${QUIZ.concept}</h1>
+        <p class="subtitle">${QUIZ.subtitle}</p>
+        <div class="icons" aria-hidden="true">🔍 📰 💬 ✅</div>
+        ${DECO.zig('left:250px;top:330px;width:110px;height:28px')}
+        ${DECO.spark('#296EB5','left:392px;top:40px;width:34px;height:34px')}
+      </div>
+      <section class="panel">
+        <p class="label">Your mission</p>
+        <h2>Show what you know!</h2>
+        <p class="long">${QUIZ.intro}</p>
+        <div class="pills"><span class="pill">${n} questions</span><span class="pill navy">${Math.round(QUIZ.passMark*100)}% to pass</span><span class="pill">Unlimited attempts</span></div>
+        <p class="long">Answers are not shown during the assessment. Score ${need} or more out of ${n} to pass. If you do not pass, you can try again. After you pass, you can review an explanation for every question.</p>
+        <p style="margin-top:14px"><button class="btn" id="go">Start assessment</button></p>
+        ${DECO.check('right:-14px;top:-16px;width:36px;height:36px')}
+      </section>
+    </div>`;
+  document.getElementById('go').onclick = () => {
+    A = { order: shuffle(QUIZ.questions.map((_,k)=>k)), picks: [], i: 0 };
+    aQ();
+  };
+}
+function aQ(){
+  const n = QUIZ.questions.length, q = QUIZ.questions[A.order[A.i]];
+  const ctx = contextHTML(q), opts = aOptions(q);
+  barRight.innerHTML = `<span class="banner red">Question ${A.i+1} of ${n}</span>
+    <div class="dots many" role="img" aria-label="Question ${A.i+1} of ${n}">${A.order.map((_,k)=>`<span class="dot ${k<A.i?'done':k===A.i?'now':''}"></span>`).join('')}</div>`;
+  app.innerHTML = `
+    <section class="card">
+      <div class="main ${ctx?'two':'one'}">
+        <div class="col left">
+          <span class="qtype">${q.label}</span>
+          ${ctx}
+          <p class="question">${q.q}</p>
+        </div>
+        <div class="col right"><div class="opts" id="opts"></div></div>
+      </div>
+      <div class="foot">
+        <span class="note">Answers are revealed after you pass.</span>
+        <button class="btn" id="next" disabled>${A.i===n-1?'Submit assessment':'Next question'}</button>
+      </div>
+    </section>`;
+  const box = document.getElementById('opts'), next = document.getElementById('next'); let pick = null;
+  opts.forEach((o,k)=>{
+    const b = el(`<button class="opt" type="button"><span class="mark">${String.fromCharCode(65+k)}</span><span>${o.t}</span></button>`);
+    b.onclick = () => { pick = k; [...box.children].forEach((c,j)=>c.classList.toggle('sel', j===k)); next.disabled = false; };
+    box.appendChild(b);
+  });
+  next.onclick = () => {
+    A.picks[A.i] = { chosen: opts[pick].t, correct: opts.find(o=>o.ok).t, ok: !!opts[pick].ok };
+    A.i++; (A.i < n) ? aQ() : aEnd();
+  };
+}
+function aEnd(){
+  const n = QUIZ.questions.length, s = A.picks.filter(p=>p.ok).length, need = Math.ceil(n*QUIZ.passMark), pass = s >= need;
+  const pct = Math.round(s/n*100);
+  if(!pass){
+    barRight.innerHTML = `<span class="banner red">Assessment · Not passed yet</span>`;
+    app.innerHTML = `
+      <section class="card">
+        <div class="main two" style="grid-template-columns:40% 1fr; align-items:center">
+          <div class="col left">
+            <p class="label">Your score</p>
+            <div class="score" style="color:var(--red)">${s}<small> / ${n}</small></div>
+            <p class="subtitle">${pct}%</p>
+          </div>
+          <div class="col right">
+            <h2>Not there yet</h2>
+            <p class="long">You have not reached ${Math.round(QUIZ.passMark*100)}% yet. Please try again.</p>
+            <p class="long">You need at least ${need} correct answers out of ${n} to pass. Tip: rewatch the three videos or check the summary before your next attempt.</p>
+          </div>
+        </div>
+        <div class="foot"><span class="note">The questions will appear in a new order.</span><button class="btn" id="again">Try again</button></div>
+      </section>`;
+  } else {
+    barRight.innerHTML = `<span class="banner">Assessment · Passed</span>`;
+    const items = A.order.map((qi,k)=>{ const q = QUIZ.questions[qi], p = A.picks[k];
+      return `<div class="rv ${p.ok?'':'bad'}"><div class="rq">${k+1}. ${q.ref}: ${q.q}</div>
+        <div class="ra">${p.ok ? `<b>✓ Your answer:</b> ${p.chosen}` : `<span class="x"><b style="color:inherit">✗ Your answer:</b> ${p.chosen}</span><br><b>Correct answer:</b> ${p.correct}`}</div>
+        <div class="ra"><b>Why:</b> ${q.why}</div></div>`; }).join('');
+    app.innerHTML = `
+      <section class="card">
+        <div class="main two" style="grid-template-columns:32% 1fr">
+          <div class="col left">
+            <p class="label">Your score</p>
+            <div class="score">${s}<small> / ${n}</small></div>
+            <h2 style="margin-top:8px">You passed!</h2>
+            <p class="long">${pct}%. You can distinguish the unique characteristics of fake news, misinformation and disinformation.</p>
+          </div>
+          <div class="col right"><p class="label" style="margin-bottom:6px">Review every question</p><div class="review">${items}</div></div>
+        </div>
+        <div class="foot"><span class="note">Scroll the list to read every explanation.</span><button class="btn navy" id="again">Take it again</button></div>
+      </section>`;
+  }
+  document.getElementById('again').onclick = aStart;
+}
+
+(QUIZ.mode === 'assessment' ? aStart : renderStart)();
 </script>
 </body>
 </html>

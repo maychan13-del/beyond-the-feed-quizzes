@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Final Assessment | Beyond the Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#BD3414; --mustard:#DA9939; --navy:#254A6B; --blue:#296EB5;
+    --cream:#F6D7A5; --sand:#F0CB91; --greige:#C1B7AE; --gold:#B46B00;
+    --black:#000000; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; height:100%; overflow:hidden; background:var(--white)}
+  body{font-family:'Archivo',Arial,sans-serif; font-weight:600; font-size:15px; line-height:1.42; color:var(--black)}
+
+  /* 16:9 stage, designed at 960x540 and scaled to fit, like a video player */
+  #stage{position:absolute; left:0; top:0; width:960px; height:540px; transform-origin:0 0;
+    background:var(--cream); overflow:hidden}
+  .decor{position:absolute; inset:0; pointer-events:none; z-index:0}
+  .decor svg{position:absolute}
+
+  .bar{position:absolute; z-index:2; left:0; right:0; top:0; height:48px; padding:0 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px}
+  .course{display:flex; align-items:baseline; gap:10px; min-width:0}
+  .course-name{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; color:var(--navy); font-size:17px; white-space:nowrap}
+  .course-tag{text-transform:uppercase; letter-spacing:.1em; color:var(--gold); font-size:10.5px; white-space:nowrap}
+  .bar-right{display:flex; align-items:center; gap:12px; flex:none}
+
+  #app{position:absolute; z-index:1; left:24px; right:24px; top:48px; bottom:18px}
+
+  .banner{display:inline-block; position:relative; background:var(--navy); color:var(--white);
+    text-transform:uppercase; letter-spacing:.1em; padding:5px 13px; border-radius:7px; font-size:12px; white-space:nowrap}
+  .banner.red{background:var(--red)}
+  .banner svg{position:absolute; top:-9px; right:-9px; width:18px; height:18px}
+  .dots{display:flex; gap:5px}
+  .dot{width:22px; height:9px; border-radius:999px; background:var(--sand); border:2px solid var(--navy)}
+  .dot.done{background:var(--navy)} .dot.now{background:var(--mustard)}
+
+  .card{position:absolute; left:0; top:0; right:8px; bottom:8px; background:var(--cream);
+    border:3px solid var(--navy); border-radius:22px; box-shadow:7px 7px 0 var(--mustard);
+    display:flex; flex-direction:column; overflow:hidden}
+  .main{flex:1; min-height:0; display:grid; gap:16px; padding:12px 18px 4px}
+  .main.two{grid-template-columns:44% 1fr}
+  .main.one{grid-template-rows:auto 1fr; gap:6px}
+  .col{min-height:0; min-width:0; overflow-y:auto; padding-right:6px; scrollbar-width:thin; scrollbar-color:var(--navy) var(--sand)}
+  .col::-webkit-scrollbar{width:8px}
+  .col::-webkit-scrollbar-track{background:var(--sand); border-radius:8px}
+  .col::-webkit-scrollbar-thumb{background:var(--navy); border-radius:8px}
+  .main.one .col.left{overflow:visible}
+  .foot{flex:none; display:flex; align-items:center; justify-content:flex-end; gap:12px; padding:6px 18px 12px}
+  .foot .note{margin-right:auto; font-weight:500; font-size:13px; color:var(--navy)}
+
+  h1.hero{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; color:var(--red);
+    font-size:74px; line-height:.95; margin:14px 0 10px; transform:rotate(-3deg); transform-origin:left center}
+  h1.hero.long{font-size:42px}
+  h2{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; color:var(--red); font-size:30px; line-height:1.1; margin:6px 0 8px}
+  .subtitle{color:var(--gold); font-size:22px; line-height:1.2; margin:8px 0}
+  p{margin:8px 0}
+  .long{font-weight:500}
+  .label{text-transform:uppercase; letter-spacing:.1em; color:var(--navy); font-size:12px; margin:0}
+  .pills{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0}
+  .pill{background:var(--mustard); color:var(--navy); border-radius:999px; padding:4px 13px; font-size:13px}
+  .pill.navy{background:var(--navy); color:var(--white)}
+  .icons{font-size:34px; display:flex; gap:10px; margin-top:16px}
+
+  button{font:inherit; cursor:pointer}
+  .btn{background:var(--red); color:var(--white); border:0; border-radius:999px; padding:10px 24px;
+    text-transform:uppercase; letter-spacing:.1em; font-size:14px; box-shadow:3px 3px 0 var(--navy); transition:transform .12s, box-shadow .12s}
+  .btn:hover:not(:disabled){transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--navy)}
+  .btn:active:not(:disabled){transform:translate(2px,2px); box-shadow:1px 1px 0 var(--navy)}
+  .btn:disabled{background:var(--greige); color:var(--black); box-shadow:none; cursor:not-allowed}
+  .btn.navy{background:var(--navy); box-shadow:3px 3px 0 var(--mustard)}
+  .btn.navy:hover:not(:disabled){box-shadow:5px 5px 0 var(--mustard)}
+  .btn:focus-visible,.opt:focus-visible,.word:focus-visible,.blank:focus-visible,.tog:focus-visible,a:focus-visible{outline:3px solid var(--blue); outline-offset:2px}
+
+  /* start + end screens */
+  .split{position:absolute; inset:0; display:grid; grid-template-columns:46% 1fr; gap:22px; align-items:center}
+  .split .panel{position:relative; background:var(--cream); border:3px solid var(--navy); border-radius:22px;
+    box-shadow:7px 7px 0 var(--mustard); padding:20px 22px; margin-right:8px}
+  .score{font-family:'Archivo Black','Arial Black',sans-serif; font-size:84px; color:var(--blue); line-height:1}
+  .score small{font-size:.42em; color:var(--navy)}
+  .chars{display:grid; gap:10px}
+  .char{background:var(--navy); color:var(--white); border-radius:18px; padding:12px 16px; display:grid; grid-template-columns:auto 1fr; column-gap:14px; align-items:center}
+  .char.red{background:var(--red)}
+  .char .num{font-family:'Archivo Black','Arial Black',sans-serif; font-size:40px; line-height:1; grid-row:span 2}
+  .char .name{text-transform:uppercase; letter-spacing:.1em; font-size:14px}
+  .char .desc{font-weight:500; font-size:13.5px}
+
+  /* question pieces */
+  .qtype{display:inline-block; background:var(--mustard); color:var(--navy); border-radius:999px; padding:2px 12px; font-size:11.5px; text-transform:uppercase; letter-spacing:.1em}
+  .scenario{background:var(--sand); border-radius:16px; padding:11px 13px; margin:9px 0; font-weight:500; font-size:14px; border-left:7px solid var(--blue)}
+  .post{background:var(--cream); border:2px solid var(--navy); border-radius:13px; padding:8px 11px; margin:7px 0 2px; font-weight:600; color:var(--navy)}
+  .case{border:3px solid var(--blue); border-radius:18px; margin:9px 0; overflow:hidden; background:var(--sand)}
+  .case-head{background:var(--navy); color:var(--white); padding:5px 13px; text-transform:uppercase; letter-spacing:.1em; font-size:11px; display:flex; justify-content:space-between; gap:6px; white-space:nowrap}
+  .case-body{padding:9px 13px; font-weight:500; font-size:13.5px}
+  .case-links{display:flex; flex-wrap:wrap; gap:8px; padding:0 13px 11px}
+  .link{display:inline-block; background:var(--blue); color:var(--white); text-decoration:none; border-radius:999px; padding:5px 13px; font-size:12.5px}
+  .link.alt{background:var(--navy)} .link:hover{background:var(--navy)} .link.alt:hover{background:var(--blue)}
+  .question{font-size:18px; color:var(--navy); margin:6px 0 2px; line-height:1.3}
+  .hint{font-weight:500; font-size:13px; margin:2px 0 0}
+
+  .opts{display:grid; gap:8px}
+  .opt{display:flex; gap:10px; align-items:flex-start; text-align:left; width:100%; background:var(--cream); color:var(--navy);
+    border:3px solid var(--navy); border-radius:18px; padding:8px 13px; font-weight:600; font-size:14.5px; transition:background .12s}
+  .opt:hover:not(:disabled){background:var(--sand)}
+  .opt .mark{flex:none; width:23px; height:23px; border-radius:50%; border:2.5px solid var(--navy); display:grid; place-items:center; font-size:12px; line-height:1; background:var(--cream); color:var(--navy)}
+  .opt.multi .mark{border-radius:7px}
+  .opt.sel{background:var(--mustard)} .opt.sel .mark{background:var(--navy); color:var(--white)}
+  .opt:disabled{cursor:default}
+  .opt.right{background:var(--navy); color:var(--white)} .opt.right .mark{background:var(--white); color:var(--navy); border-color:var(--white)}
+  .opt.wrong{background:var(--red); color:var(--white); border-color:var(--red)} .opt.wrong .mark{background:var(--white); color:var(--red); border-color:var(--white)}
+  .opt.missed{border-style:dashed; border-color:var(--blue)}
+  .tf{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .tf .opt{justify-content:center; font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; font-size:24px; padding:26px 10px}
+
+  .sort{display:grid; grid-template-columns:1fr 1fr; gap:7px}
+  .row{background:var(--sand); border-radius:16px; padding:5px 11px 6px; border:3px solid var(--sand)}
+  .row .txt{color:var(--navy); margin-bottom:4px; font-size:14px; line-height:1.3}
+  .togs{display:flex; flex-wrap:wrap; gap:7px}
+  .tog{background:var(--cream); color:var(--navy); border:2px solid var(--navy); border-radius:999px; padding:3px 12px; font-size:13px}
+  .tog.sel{background:var(--mustard)} .tog:disabled{cursor:default}
+  .row.right{border-color:var(--navy)} .row.wrong{border-color:var(--red)}
+  .row .why{font-weight:500; font-size:13px; margin-top:7px}
+  .tagok{color:var(--navy)} .tagno{color:var(--red)}
+
+  .cloze{background:var(--sand); border-radius:16px; padding:14px 16px; font-size:18px; line-height:2.2; color:var(--navy)}
+  .blank{display:inline-block; min-width:110px; text-align:center; background:var(--cream); color:var(--navy); border:3px dashed var(--navy); border-radius:999px; padding:0 12px; line-height:1.6; vertical-align:middle}
+  .blank.filled{border-style:solid; background:var(--mustard)}
+  .blank.right{background:var(--navy); color:var(--white); border-color:var(--navy); border-style:solid}
+  .blank.wrong{background:var(--red); color:var(--white); border-color:var(--red); border-style:solid}
+  .bank{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+  .word{background:var(--cream); color:var(--navy); border:3px solid var(--navy); border-radius:999px; padding:4px 14px}
+  .word:hover:not(:disabled){background:var(--mustard)}
+  .word:disabled{background:var(--greige); border-color:var(--greige); color:var(--black); cursor:default}
+
+  .fb{margin-top:10px; border-radius:16px; padding:10px 14px; background:var(--sand); border-left:9px solid var(--blue); font-size:13.5px}
+  .fb.bad{border-left-color:var(--red)}
+  .fb h3{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; margin:0 0 3px; font-size:18px; color:var(--blue)}
+  .fb.bad h3{color:var(--red)}
+  .fb p,.fb li{font-weight:500; margin:4px 0}
+  .fb ul{margin:4px 0 0; padding-left:18px}
+  .fb b{font-weight:600; color:var(--navy)}
+
+  /* assessment */
+  .dots.many .dot{width:11px}
+  .review{display:grid; gap:8px}
+  .rv{background:var(--sand); border-radius:14px; padding:8px 12px; border-left:8px solid var(--blue); font-size:13px}
+  .rv.bad{border-left-color:var(--red)}
+  .rv .rq{color:var(--navy); font-size:14px}
+  .rv .ra{font-weight:500; margin-top:3px}
+  .rv b{color:var(--navy)}
+  .rv .x{color:var(--red)}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="decor" aria-hidden="true">
+    <svg style="left:-70px;top:150px;width:330px;height:330px" viewBox="0 0 100 100"><path fill="#F0CB91" d="M38 0h24v38h38v24H62v38H38V62H0V38h38z"/></svg>
+    <svg style="right:-110px;bottom:-120px;width:380px;height:380px" viewBox="0 0 100 100"><path fill="#F0CB91" d="M38 0h24v38h38v24H62v38H38V62H0V38h38z" transform="rotate(45 50 50)"/></svg>
+    <svg style="right:-62px;top:-46px;width:140px;height:140px" viewBox="0 0 100 100"><circle cx="50" cy="50" r="36" fill="none" stroke="#DA9939" stroke-width="22"/></svg>
+    <svg style="left:-66px;bottom:-60px;width:150px;height:150px" viewBox="0 0 100 100"><circle cx="50" cy="50" r="36" fill="none" stroke="#254A6B" stroke-width="22"/></svg>
+  </div>
+  <div class="bar">
+    <div class="course">
+      <svg style="width:22px;height:22px;align-self:center;flex:none" viewBox="0 0 100 100" aria-hidden="true"><g fill="#BD3414"><rect x="42" y="2" width="16" height="96" rx="4"/><rect x="42" y="2" width="16" height="96" rx="4" transform="rotate(45 50 50)"/><rect x="42" y="2" width="16" height="96" rx="4" transform="rotate(90 50 50)"/><rect x="42" y="2" width="16" height="96" rx="4" transform="rotate(135 50 50)"/></g></svg>
+      <span class="course-name">Beyond the Feed</span>
+      <span class="course-tag">From Social Media Consumers to Digital Advocates</span>
+    </div>
+    <div class="bar-right" id="barRight"></div>
+  </div>
+  <main id="app"></main>
+</div>
+
+<script>
+const QUIZ = {
+  mode: 'assessment',
+  passMark: 0.8,
+  concept: 'Final Assessment',
+  subtitle: 'Fake news, misinformation or disinformation?',
+  intro: 'This assessment checks whether you can distinguish the unique characteristics of fake news, misinformation and disinformation.',
+  types: ['Fake news', 'Misinformation', 'Disinformation'],
+  questions: [
+    {
+      label: 'Real case', ref: 'The Great Moon Hoax (1835)',
+      caseFile: {
+        meta: 'New York Sun · August 1835',
+        text: 'A New York newspaper ran six articles announcing that a famous astronomer had discovered life on the Moon, including winged "man-bats". No such discovery existed. The writer made up the whole series, sales of the paper soared, and the paper admitted weeks later that the articles were a hoax.',
+        links: [{ label: 'Read about the case ↗', url: 'https://www.history.com/this-day-in-history/the-great-moon-hoax' }]
+      },
+      q: 'Which type of false information is this?',
+      classify: 0,
+      why: 'Fake news. The whole story was invented, with zero factual basis, and it was created on purpose to sell newspapers.'
+    },
+    {
+      label: 'Real case', ref: 'Swans "return" to Venice (2020)',
+      caseFile: {
+        meta: 'Twitter · March 2020',
+        text: 'During the COVID-19 lockdown, a user tweeted photos saying that swans had "returned" to the canals of Venice. The post received about a million likes. In fact, swans have always been common in the canals of Burano, where the photos were taken. She later told National Geographic that she did not know this and only wanted to share something joyful.',
+        links: [{ label: 'Read the news report ↗', url: 'https://www.nationalgeographic.com/animals/article/coronavirus-pandemic-fake-animal-viral-social-media-posts' }]
+      },
+      q: 'Which type of false information is this?',
+      classify: 1,
+      why: 'Misinformation. The claim was inaccurate, but she believed it and had no intention to mislead anyone. It was an honest mistake.'
+    },
+    {
+      label: 'Real case', ref: 'Slowed-down video of a politician (2019)',
+      caseFile: {
+        meta: 'Facebook · May 2019',
+        text: 'A real video of US House Speaker Nancy Pelosi giving a speech was slowed down so that her words sounded slurred. It was posted with claims that she was drunk and was viewed millions of times. Fact-checkers compared it with the original footage and confirmed that the video had been altered.',
+        links: [{ label: 'Read the fact-check ↗', url: 'https://www.factcheck.org/?p=158125' }]
+      },
+      q: 'Which type of false information is this?',
+      classify: 2,
+      why: 'Disinformation. Real footage was deliberately edited by someone who knew the result was untrue, and it was shared to mislead viewers and damage a person\'s credibility.'
+    },
+    {
+      label: 'Real case', ref: 'Fake image of an explosion (2023)',
+      caseFile: {
+        meta: 'Twitter · 22 May 2023',
+        text: 'An image of black smoke beside a building spread online with the claim that there had been an explosion near the Pentagon. Officials confirmed that no explosion had happened, and experts said the image was probably generated by AI. The US stock market dipped briefly before the claim was debunked.',
+        links: [{ label: 'Read the news report ↗', url: 'https://www.npr.org/2023/05/22/1177590231/fake-viral-images-of-an-explosion-at-the-pentagon-were-probably-created-by-ai' }]
+      },
+      q: 'Which characteristic makes this image fake news?',
+      options: [
+        { t: 'The event it shows was entirely invented. No explosion took place.', ok: true },
+        { t: 'It was shared by people who honestly believed it.', ok: false },
+        { t: 'It was a real photo with its context cut out.', ok: false },
+        { t: 'It affected the stock market.', ok: false }
+      ],
+      why: 'Fake news is entirely fabricated. The image showed an event that never happened, so there was zero factual basis. Its impact on the market, and the fact that some people believed it, do not define the type.'
+    },
+    {
+      label: 'Real case', ref: 'The "Momo challenge" warnings (2019)',
+      caseFile: {
+        meta: 'Facebook and school letters · February 2019',
+        text: 'Warnings spread among parents that a scary online "Momo challenge" was putting children in danger. Schools and police forces passed the warnings on in order to protect children. Children\'s charities and fact-checkers later said there was no evidence that the challenge existed.',
+        links: [{ label: 'Read the fact-check ↗', url: 'https://fullfact.org/online/momo-challenge-hoax/' }]
+      },
+      q: 'Which characteristic shows that the warnings shared by parents and schools were misinformation?',
+      options: [
+        { t: 'They believed the warning was true and shared it to protect children.', ok: true },
+        { t: 'They invented the challenge to frighten families.', ok: false },
+        { t: 'They knew it was false but wanted more followers.', ok: false },
+        { t: 'The warnings were reported by many news outlets.', ok: false }
+      ],
+      why: 'Misinformation is inaccurate content shared with no intent to mislead. The parents and schools believed the warning and meant well, so they made an honest mistake.'
+    },
+    {
+      label: 'Scenario', ref: 'The edited election speech',
+      scenario: 'In a student union election, a supporter of one candidate takes a real video of the rival\'s speech. He cuts out the words "we will never", so that the rival seems to promise higher membership fees. He posts the clip the night before the vote.',
+      q: 'Which type of false information is this?',
+      classify: 2,
+      why: 'Disinformation. He knows the edited clip gives a false impression, and he shares it on purpose to mislead voters and damage the rival\'s credibility.'
+    },
+    {
+      label: 'Key idea', ref: 'Misinformation vs disinformation',
+      q: 'What is the key difference between misinformation and disinformation?',
+      options: [
+        { t: 'Whether the person spreading it knows it is false and intends to mislead.', ok: true },
+        { t: 'How many people see and share the post.', ok: false },
+        { t: 'Whether it appears on social media or in a newspaper.', ok: false },
+        { t: 'Whether the topic is serious or trivial.', ok: false }
+      ],
+      why: 'Both involve false content. Misinformation is shared by honest mistake. Disinformation is shared by someone who knows it is false and wants to mislead.'
+    },
+    {
+      label: 'Key idea', ref: 'Characteristics of fake news',
+      q: 'Which two characteristics together describe fake news?',
+      options: [
+        { t: 'The whole story is invented, and it is created on purpose.', ok: true },
+        { t: 'The information is wrong, and it is shared by honest mistake.', ok: false },
+        { t: 'The information is true, but many people dislike it.', ok: false },
+        { t: 'The information is outdated, and the sharer believes it is current.', ok: false }
+      ],
+      why: 'Fake news is entirely fabricated, with zero factual basis, and it is made on purpose. It is not a mistake or a misunderstanding.'
+    },
+    {
+      label: 'Key idea', ref: 'Characteristics of misinformation',
+      q: 'A post is misinformation when…',
+      options: [
+        { t: '…the content is inaccurate and the person sharing it believes it is true.', ok: true },
+        { t: '…the content is entirely invented to attract views.', ok: false },
+        { t: '…the content is accurate but shared without permission.', ok: false },
+        { t: '…the sharer knows it is false and wants to mislead others.', ok: false }
+      ],
+      why: 'Misinformation has two characteristics: the content is inaccurate, and it is shared unintentionally by someone who believes it. Wrong content + no bad intention = misinformation.'
+    },
+    {
+      label: 'Key idea', ref: 'Characteristics of disinformation',
+      q: 'Which statement about disinformation is correct?',
+      options: [
+        { t: 'The spreader knows the content is untrue and shares it on purpose to mislead.', ok: true },
+        { t: 'The spreader makes an honest mistake and corrects it later.', ok: false },
+        { t: 'It only counts as disinformation if it goes viral.', ok: false },
+        { t: 'It always comes from an entirely invented story with nothing real in it.', ok: false }
+      ],
+      why: 'Disinformation is knowingly false and shared to mislead. It often twists real material, such as edited videos or clips with the context cut out, so it does not have to be entirely invented.'
+    }
+  ]
+};
+
+
+/* ============================ ENGINE ============================ */
+const stage = document.getElementById('stage'), app = document.getElementById('app'), barRight = document.getElementById('barRight');
+const SPARK = '<svg viewBox="0 0 100 100" aria-hidden="true"><path fill="#DA9939" d="M50 0C54 32 68 46 100 50C68 54 54 68 50 100C46 68 32 54 0 50C32 46 46 32 50 0Z"/></svg>';
+const DECO = {
+  spark:(c,st)=>`<svg style="position:absolute;${st}" viewBox="0 0 100 100" aria-hidden="true"><path fill="${c}" d="M50 0C54 32 68 46 100 50C68 54 54 68 50 100C46 68 32 54 0 50C32 46 46 32 50 0Z"/></svg>`,
+  zig:(st)=>`<svg style="position:absolute;${st}" viewBox="0 0 120 30" aria-hidden="true"><path d="M4 22L24 6L44 22L64 6L84 22L104 6L116 16" fill="none" stroke="#DA9939" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  check:(st)=>`<svg style="position:absolute;${st}" viewBox="0 0 4 4" aria-hidden="true"><rect width="4" height="4" fill="#FFFFFF"/><g fill="#000000"><rect width="1" height="1"/><rect x="2" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/></g></svg>`
+};
+let S = { i: 0, score: 0 };
+
+/* Fit the 16:9 stage to the window or iframe, capped at a normal video-player size */
+function fit(){
+  const W = window.innerWidth, H = window.innerHeight;
+  const s = Math.min(W/960, H/540);
+  stage.style.transform = `scale(${s})`;
+  stage.style.left = Math.max(0, (W - 960*s)/2) + 'px';
+  stage.style.top = '0px';
+}
+window.addEventListener('resize', fit); fit();
+
+function shuffle(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+
+function renderStart(){
+  barRight.innerHTML = '';
+  app.innerHTML = `
+    <div class="split">
+      <div>
+        <span class="banner">Quiz ${QUIZ.number} of ${QUIZ.total} · Practice${SPARK}</span>
+        <h1 class="hero${QUIZ.concept.length>10?' long':''}">${QUIZ.concept}</h1>
+        <p class="subtitle">${QUIZ.subtitle}</p>
+        <div class="icons" aria-hidden="true">👍 💬 ❤️ 📣</div>
+        ${DECO.zig('left:250px;top:330px;width:110px;height:28px')}
+        ${DECO.spark('#296EB5','left:392px;top:40px;width:34px;height:34px')}
+      </div>
+      <section class="panel">
+        <p class="label">Your mission</p>
+        <h2>Quick quiz time!</h2>
+        <p class="long">${QUIZ.intro}</p>
+        <div class="pills"><span class="pill">${QUIZ.questions.length} questions</span><span class="pill">About 5 minutes</span><span class="pill navy">Not graded</span></div>
+        <p class="long">You get feedback after every question. If you answer wrongly, you will see why, so use it to sharpen your understanding.</p>
+        <p style="margin-top:14px"><button class="btn" id="go">Start quiz</button></p>
+        ${DECO.check('right:-14px;top:-16px;width:36px;height:36px')}
+      </section>
+    </div>`;
+  document.getElementById('go').onclick = () => { S = { i:0, score:0 }; renderQ(); };
+}
+
+function contextHTML(q){
+  let h = '';
+  if(q.scenario || q.post || q.scenario2){
+    h += `<div class="scenario">${q.scenario ? `<div>${q.scenario}</div>` : ''}${q.post ? `<div class="post">${q.post}</div>` : ''}${q.scenario2 ? `<div style="margin-top:7px">${q.scenario2}</div>` : ''}</div>`;
+  }
+  if(q.caseFile){
+    const c = q.caseFile;
+    h += `<div class="case"><div class="case-head"><span>Real case</span><span>${c.meta}</span></div>
+      <div class="case-body">${c.text}</div>
+      <div class="case-links">${c.links.map(l=>`<a class="link${l.alt?' alt':''}" href="${l.url}" target="_blank" rel="noopener noreferrer">${l.label}</a>`).join('')}</div></div>`;
+  }
+  return h;
+}
+
+function renderQ(){
+  const q = QUIZ.questions[S.i], n = QUIZ.questions.length;
+  const ctx = contextHTML(q);
+  barRight.innerHTML = `<span class="banner red">Question ${S.i+1} of ${n}</span>
+    <div class="dots" role="img" aria-label="Question ${S.i+1} of ${n}">${QUIZ.questions.map((_,k)=>`<span class="dot ${k<S.i?'done':k===S.i?'now':''}"></span>`).join('')}</div>`;
+  app.innerHTML = `
+    <section class="card">
+      <div class="main ${ctx?'two':'one'}">
+        <div class="col left">
+          <span class="qtype">${QUIZ.concept} · ${q.label}</span>
+          ${ctx}
+          <p class="question">${q.q}</p>
+          ${q.hint ? `<p class="hint">${q.hint}</p>` : ''}
+        </div>
+        <div class="col right" id="right"><div id="body"></div><div id="fb" aria-live="polite"></div></div>
+      </div>
+      <div class="foot">
+        <button class="btn" id="check" disabled>Check answer</button>
+        <button class="btn navy" id="next" hidden>${S.i===n-1?'See my results':'Next question'}</button>
+      </div>
+    </section>`;
+  const body = document.getElementById('body'), check = document.getElementById('check'), next = document.getElementById('next');
+  const grade = BUILD[q.type](q, body, ready => { check.disabled = !ready; });
+  check.onclick = () => {
+    const r = grade();
+    if(r.correct) S.score++;
+    const fb = document.getElementById('fb');
+    fb.innerHTML = `<div class="fb ${r.correct?'':'bad'}"><h3>${r.correct ? (r.title||'Correct!') : (r.title||'Not quite')}</h3>${r.html}</div>`;
+    check.hidden = true; next.hidden = false; next.focus({preventScroll:true});
+    const right = document.getElementById('right');
+    if(q.type !== 'sort') right.scrollTo({ top: fb.offsetTop - right.offsetTop - 6, behavior:'smooth' });
+  };
+  next.onclick = () => { S.i++; (S.i < n) ? renderQ() : renderEnd(); };
+}
+
+const BUILD = {
+  mc(q, body, ready){
+    const opts = shuffle(q.options); let pick = null;
+    const box = el('<div class="opts"></div>');
+    opts.forEach((o,k)=>{
+      const b = el(`<button class="opt" type="button"><span class="mark">${String.fromCharCode(65+k)}</span><span>${o.t}</span></button>`);
+      b.onclick = () => { pick = k; [...box.children].forEach((c,j)=>c.classList.toggle('sel', j===k)); ready(true); };
+      box.appendChild(b);
+    });
+    body.appendChild(box);
+    return () => {
+      [...box.children].forEach((c,j)=>{ c.disabled = true; c.classList.remove('sel');
+        if(opts[j].ok){ c.classList.add('right'); c.querySelector('.mark').textContent='✓'; }
+        else if(j===pick){ c.classList.add('wrong'); c.querySelector('.mark').textContent='✗'; } });
+      const chosen = opts[pick], right = opts.find(o=>o.ok);
+      return chosen.ok
+        ? { correct:true, html:`<p>${chosen.why}</p>` }
+        : { correct:false, html:`<p><b>Why your answer is wrong:</b> ${chosen.why}</p><p><b>The best answer:</b> ${right.t} ${right.why}</p>` };
+    };
+  },
+
+  multi(q, body, ready){
+    const opts = shuffle(q.options); const sel = new Set();
+    const box = el('<div class="opts"></div>');
+    opts.forEach((o,k)=>{
+      const b = el(`<button class="opt multi" type="button" aria-pressed="false"><span class="mark"></span><span>${o.t}</span></button>`);
+      b.onclick = () => { sel.has(k) ? sel.delete(k) : sel.add(k);
+        b.classList.toggle('sel', sel.has(k)); b.setAttribute('aria-pressed', sel.has(k));
+        b.querySelector('.mark').textContent = sel.has(k) ? '✓' : ''; ready(sel.size>0); };
+      box.appendChild(b);
+    });
+    body.appendChild(box);
+    return () => {
+      let allRight = true; const lines = [];
+      [...box.children].forEach((c,j)=>{ const o = opts[j], chosen = sel.has(j); c.disabled = true; c.classList.remove('sel');
+        if(chosen && o.ok){ c.classList.add('right'); c.querySelector('.mark').textContent='✓'; }
+        else if(chosen && !o.ok){ c.classList.add('wrong'); c.querySelector('.mark').textContent='✗'; allRight=false;
+          lines.push(`<li><b>You selected:</b> "${o.t}" ${o.why}</li>`); }
+        else if(!chosen && o.ok){ c.classList.add('missed'); allRight=false;
+          lines.push(`<li><b>You missed:</b> "${o.t}" ${o.why}</li>`); }
+      });
+      const rights = opts.filter(o=>o.ok);
+      return allRight
+        ? { correct:true, html:`<p>You found every real clue and ignored the distractions.</p><ul>${rights.map(o=>`<li>${o.why}</li>`).join('')}</ul>` }
+        : { correct:false, html:`<ul>${lines.join('')}</ul><p><b>Remember:</b> ${q.remember}</p>` };
+    };
+  },
+
+  sort(q, body, ready){
+    const cats = q.cats || [q.yes, q.no];
+    const want = it => (it.cat !== undefined) ? it.cat : (it.ok ? 0 : 1);
+    const items = shuffle(q.items); const ans = new Array(items.length).fill(null);
+    const box = el('<div class="sort"></div>');
+    items.forEach((it,k)=>{
+      const r = el(`<div class="row"><div class="txt">${it.t}</div><div class="togs">${cats.map((c,v)=>`<button class="tog" type="button" data-v="${v}">${c}</button>`).join('')}</div></div>`);
+      r.querySelectorAll('.tog').forEach(t => t.onclick = () => {
+        ans[k] = +t.dataset.v;
+        r.querySelectorAll('.tog').forEach(x=>x.classList.toggle('sel', x===t));
+        ready(ans.every(a=>a!==null));
+      });
+      box.appendChild(r);
+    });
+    body.appendChild(box);
+    return () => {
+      let wrong = 0;
+      [...box.children].forEach((r,k)=>{ const it = items[k], ok = ans[k]===want(it); if(!ok) wrong++;
+        r.classList.add(ok?'right':'wrong'); r.querySelectorAll('.tog').forEach(t=>t.disabled=true);
+        r.appendChild(el(`<div class="why"><span class="${ok?'tagok':'tagno'}"><b>${ok?'✓ Correct.':'✗ This one is '+cats[want(it)].toLowerCase()+'.'}</b></span> ${it.why}</div>`));
+      });
+      return wrong===0
+        ? { correct:true, html:`<p>All ${items.length} sorted correctly. ${q.okMsg}</p>` }
+        : { correct:false, title:`${items.length-wrong} of ${items.length} correct`, html:`<p>Check the explanations under each statement above. ${q.failMsg}</p>` };
+    };
+  },
+
+  tf(q, body, ready){
+    let pick = null;
+    const box = el(`<div class="tf"><button class="opt" type="button">${q.trueLabel}</button><button class="opt" type="button">${q.falseLabel}</button></div>`);
+    const btns = [...box.children];
+    btns.forEach((b,k)=> b.onclick = () => { pick = (k===0); btns.forEach((c,j)=>c.classList.toggle('sel', j===k)); ready(true); });
+    body.appendChild(box);
+    return () => {
+      btns.forEach((b,k)=>{ const val = (k===0); b.disabled = true; b.classList.remove('sel');
+        if(val===q.answer) b.classList.add('right'); else if(val===pick) b.classList.add('wrong'); });
+      const correct = pick===q.answer;
+      return { correct, html:`<p>${correct?'':'<b>The answer is '+(q.answer?q.trueLabel:q.falseLabel)+'.</b> '}${q.why}</p>` };
+    };
+  },
+
+  cloze(q, body, ready){
+    const fills = new Array(q.answers.length).fill(null);
+    const words = shuffle(q.answers.concat(q.distractors));
+    const sent = el('<div class="cloze"></div>');
+    q.parts.forEach((p,k)=>{
+      sent.appendChild(document.createTextNode(p));
+      if(k < q.answers.length){ const b = el(`<button class="blank" type="button" data-k="${k}" aria-label="Gap ${k+1}, empty">&nbsp;</button>`); sent.appendChild(b); }
+    });
+    const bank = el('<div class="bank"></div>');
+    words.forEach(w => bank.appendChild(el(`<button class="word" type="button">${w}</button>`)));
+    const blanks = () => [...sent.querySelectorAll('.blank')];
+    const sync = () => {
+      blanks().forEach((b,k)=>{ b.textContent = fills[k] || ' '; b.classList.toggle('filled', !!fills[k]); b.setAttribute('aria-label', `Gap ${k+1}, ${fills[k]||'empty'}`); });
+      [...bank.children].forEach(w => w.disabled = fills.includes(w.textContent));
+      ready(fills.every(Boolean));
+    };
+    bank.onclick = e => { const w = e.target.closest('.word'); if(!w || w.disabled) return; const k = fills.indexOf(null); if(k<0) return; fills[k] = w.textContent; sync(); };
+    sent.onclick = e => { const b = e.target.closest('.blank'); if(!b || b.disabled) return; fills[+b.dataset.k] = null; sync(); };
+    body.appendChild(sent); body.appendChild(bank);
+    return () => {
+      let wrong = 0;
+      blanks().forEach((b,k)=>{ const ok = fills[k]===q.answers[k]; if(!ok) wrong++; b.disabled = true; b.classList.remove('filled'); b.classList.add(ok?'right':'wrong'); });
+      [...bank.children].forEach(w=>w.disabled=true);
+      return wrong===0
+        ? { correct:true, html:`<p>${q.why}</p>` }
+        : { correct:false, title:`${q.answers.length-wrong} of ${q.answers.length} gaps correct`, html:`<p><b>The full definition:</b> ${q.why}</p>` };
+    };
+  }
+};
+
+function renderEnd(){
+  const n = QUIZ.questions.length, s = S.score;
+  const msg = s===n ? 'Perfect score! You clearly know what makes ' + QUIZ.concept.toLowerCase() + ' what it is.'
+            : s>=n-2 ? 'Nice work! Review the two characteristics to lock them in.'
+            : 'Good effort. This quiz is for practice, so read the recap and try again.';
+  barRight.innerHTML = `<span class="banner">Quiz ${QUIZ.number} of ${QUIZ.total} · Complete</span>`;
+  app.innerHTML = `
+    <section class="card">
+      <div class="main two" style="grid-template-columns:36% 1fr; align-items:center">
+        <div class="col left">
+          <p class="label">Your result</p>
+          <div class="score">${s}<small> / ${n}</small></div>
+          <p class="long">${msg}</p>
+        </div>
+        <div class="col right">
+          <p class="subtitle" style="margin-top:0">The two unique characteristics of ${QUIZ.concept.toLowerCase()}</p>
+          <div class="chars">
+            ${QUIZ.characteristics.map((c,k)=>`<div class="char ${k%2?'red':''}"><div class="num">${k+1}</div><div class="name">${c.name}</div><div class="desc">${c.desc}</div></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="note">${QUIZ.next}</span><button class="btn" id="again">Try again</button></div>
+    </section>`;
+  document.getElementById('again').onclick = renderStart;
+}
+
+
+/* ============================ ASSESSMENT MODE ============================ */
+let A = { order: [], picks: [], i: 0 };
+function aOptions(q){
+  if(q.classify !== undefined) return QUIZ.types.map((t,k)=>({ t, ok: k===q.classify }));
+  return shuffle(q.options);
+}
+function aStart(){
+  const n = QUIZ.questions.length, need = Math.ceil(n*QUIZ.passMark);
+  barRight.innerHTML = '';
+  app.innerHTML = `
+    <div class="split">
+      <div>
+        <span class="banner red">Final assessment${SPARK}</span>
+        <h1 class="hero long">${QUIZ.concept}</h1>
+        <p class="subtitle">${QUIZ.subtitle}</p>
+        <div class="icons" aria-hidden="true">🔍 📰 💬 ✅</div>
+        ${DECO.zig('left:250px;top:330px;width:110px;height:28px')}
+        ${DECO.spark('#296EB5','left:392px;top:40px;width:34px;height:34px')}
+      </div>
+      <section class="panel">
+        <p class="label">Your mission</p>
+        <h2>Show what you know!</h2>
+        <p class="long">${QUIZ.intro}</p>
+        <div class="pills"><span class="pill">${n} questions</span><span class="pill navy">${Math.round(QUIZ.passMark*100)}% to pass</span><span class="pill">Unlimited attempts</span></div>
+        <p class="long">Answers are not shown during the assessment. Score ${need} or more out of ${n} to pass. If you do not pass, you can try again. After you pass, you can review an explanation for every question.</p>
+        <p style="margin-top:14px"><button class="btn" id="go">Start assessment</button></p>
+        ${DECO.check('right:-14px;top:-16px;width:36px;height:36px')}
+      </section>
+    </div>`;
+  document.getElementById('go').onclick = () => {
+    A = { order: shuffle(QUIZ.questions.map((_,k)=>k)), picks: [], i: 0 };
+    aQ();
+  };
+}
+function aQ(){
+  const n = QUIZ.questions.length, q = QUIZ.questions[A.order[A.i]];
+  const ctx = contextHTML(q), opts = aOptions(q);
+  barRight.innerHTML = `<span class="banner red">Question ${A.i+1} of ${n}</span>
+    <div class="dots many" role="img" aria-label="Question ${A.i+1} of ${n}">${A.order.map((_,k)=>`<span class="dot ${k<A.i?'done':k===A.i?'now':''}"></span>`).join('')}</div>`;
+  app.innerHTML = `
+    <section class="card">
+      <div class="main ${ctx?'two':'one'}">
+        <div class="col left">
+          <span class="qtype">${q.label}</span>
+          ${ctx}
+          <p class="question">${q.q}</p>
+        </div>
+        <div class="col right"><div class="opts" id="opts"></div></div>
+      </div>
+      <div class="foot">
+        <span class="note">Answers are revealed after you pass.</span>
+        <button class="btn" id="next" disabled>${A.i===n-1?'Submit assessment':'Next question'}</button>
+      </div>
+    </section>`;
+  const box = document.getElementById('opts'), next = document.getElementById('next'); let pick = null;
+  opts.forEach((o,k)=>{
+    const b = el(`<button class="opt" type="button"><span class="mark">${String.fromCharCode(65+k)}</span><span>${o.t}</span></button>`);
+    b.onclick = () => { pick = k; [...box.children].forEach((c,j)=>c.classList.toggle('sel', j===k)); next.disabled = false; };
+    box.appendChild(b);
+  });
+  next.onclick = () => {
+    A.picks[A.i] = { chosen: opts[pick].t, correct: opts.find(o=>o.ok).t, ok: !!opts[pick].ok };
+    A.i++; (A.i < n) ? aQ() : aEnd();
+  };
+}
+function aEnd(){
+  const n = QUIZ.questions.length, s = A.picks.filter(p=>p.ok).length, need = Math.ceil(n*QUIZ.passMark), pass = s >= need;
+  const pct = Math.round(s/n*100);
+  if(!pass){
+    barRight.innerHTML = `<span class="banner red">Assessment · Not passed yet</span>`;
+    app.innerHTML = `
+      <section class="card">
+        <div class="main two" style="grid-template-columns:40% 1fr; align-items:center">
+          <div class="col left">
+            <p class="label">Your score</p>
+            <div class="score" style="color:var(--red)">${s}<small> / ${n}</small></div>
+            <p class="subtitle">${pct}%</p>
+          </div>
+          <div class="col right">
+            <h2>Not there yet</h2>
+            <p class="long">You have not reached ${Math.round(QUIZ.passMark*100)}% yet. Please try again.</p>
+            <p class="long">You need at least ${need} correct answers out of ${n} to pass. Tip: rewatch the three videos or check the summary before your next attempt.</p>
+          </div>
+        </div>
+        <div class="foot"><span class="note">The questions will appear in a new order.</span><button class="btn" id="again">Try again</button></div>
+      </section>`;
+  } else {
+    barRight.innerHTML = `<span class="banner">Assessment · Passed</span>`;
+    const items = A.order.map((qi,k)=>{ const q = QUIZ.questions[qi], p = A.picks[k];
+      return `<div class="rv ${p.ok?'':'bad'}"><div class="rq">${k+1}. ${q.ref}: ${q.q}</div>
+        <div class="ra">${p.ok ? `<b>✓ Your answer:</b> ${p.chosen}` : `<span class="x"><b style="color:inherit">✗ Your answer:</b> ${p.chosen}</span><br><b>Correct answer:</b> ${p.correct}`}</div>
+        <div class="ra"><b>Why:</b> ${q.why}</div></div>`; }).join('');
+    app.innerHTML = `
+      <section class="card">
+        <div class="main two" style="grid-template-columns:32% 1fr">
+          <div class="col left">
+            <p class="label">Your score</p>
+            <div class="score">${s}<small> / ${n}</small></div>
+            <h2 style="margin-top:8px">You passed!</h2>
+            <p class="long">${pct}%. You can distinguish the unique characteristics of fake news, misinformation and disinformation.</p>
+          </div>
+          <div class="col right"><p class="label" style="margin-bottom:6px">Review every question</p><div class="review">${items}</div></div>
+        </div>
+        <div class="foot"><span class="note">Scroll the list to read every explanation.</span><button class="btn navy" id="again">Take it again</button></div>
+      </section>`;
+  }
+  document.getElementById('again').onclick = aStart;
+}
+
+(QUIZ.mode === 'assessment' ? aStart : renderStart)();
+</script>
+</body>
+</html>

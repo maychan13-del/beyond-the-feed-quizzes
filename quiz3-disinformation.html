@@ -209,27 +209,26 @@ const QUIZ = {
     {
       type: 'multi', label: 'Real case',
       caseFile: {
-        meta: "The People's Voice · 7 Nov 2026",
-        text: 'An article claims scientists found microscopic "tracking agents" in Coke and Pepsi, with a paper trail leading to the Gates Foundation. A real 2018 study did report tiny fluorescent particles in the drinks, but its summary says nothing about tracking or the foundation. Fact-checkers have repeatedly debunked other stories from this website.',
+        meta: 'Social media · since 2011',
+        text: 'A picture of a shark swimming beside cars on a flooded highway appears online after almost every big storm. Fact-checkers found that someone took a shark from a real wildlife photo and edited it into a real photo of a flooded road. The image first spread in 2011 and has been reposted as "new" during many later hurricanes.',
         links: [
-          { label: 'Open the article ↗', url: 'https://thepeoplesvoice.tv/scientists-microscopic-tracking-agents-coke-pepsi-paper-trail-gates-foundation/' },
-          { label: "Website's record ↗", url: 'https://www.thejournal.ie/article.php?id=6776235', alt: true }
+          { label: 'Read the fact-check ↗', url: 'https://news.yahoo.com/fact-check-fabricated-image-shark-231108703.html' }
         ]
       },
-      q: 'Which clues point to disinformation in this case?',
+      q: 'Which clues show that the edited image is disinformation?',
       hint: 'Select ALL that apply.',
-      remember: 'the real clues are the ones that show real material being twisted on purpose, and a spreader who is unlikely to be making an honest mistake.',
+      remember: 'the real clues are the ones that show real material being changed on purpose by someone who knew the result was untrue. People who later reshared the image believing it was real were spreading misinformation.',
       options: [
-        { t: 'A real study is given an alarming new label, "tracking agents", that its summary never uses.', ok: true,
-          why: 'Correct clue. Real material is taken out of context and reframed so that readers reach a false conclusion.' },
-        { t: 'The same website has been debunked again and again for publishing false stories.', ok: true,
-          why: 'Correct clue. A repeated pattern points to deliberate publishing, not to a single honest mistake.' },
-        { t: 'The article refers to scientific research.', ok: false,
-          why: 'Not a clue. Accurate articles refer to research too. Disinformation often borrows real research to look credible, so you must check what the research actually says.' },
-        { t: 'The article is about famous drink brands.', ok: false,
-          why: 'Not a clue. The topic does not tell you whether the content is false or why it was published.' },
-        { t: 'The headline uses dramatic language.', ok: false,
-          why: 'Not a clue on its own. Real news can have dramatic headlines too. Look at whether the content is knowingly false and meant to mislead.' }
+        { t: 'Two real photos were combined to show something that never happened.', ok: true,
+          why: 'Correct clue. Real material was edited to create a false impression, which is a typical disinformation technique.' },
+        { t: 'The person who edited the image knew the shark was never on that road.', ok: true,
+          why: 'Correct clue. The content is knowingly false. It is not an honest mistake.' },
+        { t: 'The image has been shared thousands of times.', ok: false,
+          why: 'Not a clue. Popularity does not tell you whether content is false or why it was made.' },
+        { t: 'The image appears during real hurricanes.', ok: false,
+          why: 'Not a clue. Real events attract accurate posts too. What matters is that this image was altered on purpose.' },
+        { t: 'The image looks realistic.', ok: false,
+          why: 'Not a clue on its own. Real photos look realistic too. You need to check where the image came from.' }
       ]
     },
     {

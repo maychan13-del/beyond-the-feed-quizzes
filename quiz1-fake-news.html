@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz 1: Fake News | Beyond the Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#BD3414; --mustard:#DA9939; --navy:#254A6B; --blue:#296EB5;
+    --cream:#F6D7A5; --sand:#F0CB91; --greige:#C1B7AE; --gold:#B46B00;
+    --black:#000000; --white:#FFFFFF;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; height:100%; overflow:hidden; background:var(--white)}
+  body{font-family:'Archivo',Arial,sans-serif; font-weight:600; font-size:15px; line-height:1.42; color:var(--black)}
+
+  /* 16:9 stage, designed at 960x540 and scaled to fit, like a video player */
+  #stage{position:absolute; left:0; top:0; width:960px; height:540px; transform-origin:0 0;
+    background:var(--cream); overflow:hidden}
+  .decor{position:absolute; inset:0; pointer-events:none; z-index:0}
+  .decor svg{position:absolute}
+
+  .bar{position:absolute; z-index:2; left:0; right:0; top:0; height:48px; padding:0 24px;
+    display:flex; align-items:center; justify-content:space-between; gap:14px}
+  .course{display:flex; align-items:baseline; gap:10px; min-width:0}
+  .course-name{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; color:var(--navy); font-size:17px; white-space:nowrap}
+  .course-tag{text-transform:uppercase; letter-spacing:.1em; color:var(--gold); font-size:10.5px; white-space:nowrap}
+  .bar-right{display:flex; align-items:center; gap:12px; flex:none}
+
+  #app{position:absolute; z-index:1; left:24px; right:24px; top:48px; bottom:18px}
+
+  .banner{display:inline-block; position:relative; background:var(--navy); color:var(--white);
+    text-transform:uppercase; letter-spacing:.1em; padding:5px 13px; border-radius:7px; font-size:12px; white-space:nowrap}
+  .banner.red{background:var(--red)}
+  .banner svg{position:absolute; top:-9px; right:-9px; width:18px; height:18px}
+  .dots{display:flex; gap:5px}
+  .dot{width:22px; height:9px; border-radius:999px; background:var(--sand); border:2px solid var(--navy)}
+  .dot.done{background:var(--navy)} .dot.now{background:var(--mustard)}
+
+  .card{position:absolute; left:0; top:0; right:8px; bottom:8px; background:var(--cream);
+    border:3px solid var(--navy); border-radius:22px; box-shadow:7px 7px 0 var(--mustard);
+    display:flex; flex-direction:column; overflow:hidden}
+  .main{flex:1; min-height:0; display:grid; gap:16px; padding:12px 18px 4px}
+  .main.two{grid-template-columns:44% 1fr}
+  .main.one{grid-template-rows:auto 1fr; gap:6px}
+  .col{min-height:0; min-width:0; overflow-y:auto; padding-right:6px; scrollbar-width:thin; scrollbar-color:var(--navy) var(--sand)}
+  .col::-webkit-scrollbar{width:8px}
+  .col::-webkit-scrollbar-track{background:var(--sand); border-radius:8px}
+  .col::-webkit-scrollbar-thumb{background:var(--navy); border-radius:8px}
+  .main.one .col.left{overflow:visible}
+  .foot{flex:none; display:flex; align-items:center; justify-content:flex-end; gap:12px; padding:6px 18px 12px}
+  .foot .note{margin-right:auto; font-weight:500; font-size:13px; color:var(--navy)}
+
+  h1.hero{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; color:var(--red);
+    font-size:74px; line-height:.95; margin:14px 0 10px; transform:rotate(-3deg); transform-origin:left center}
+  h1.hero.long{font-size:54px}
+  h2{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; color:var(--red); font-size:30px; line-height:1.1; margin:6px 0 8px}
+  .subtitle{color:var(--gold); font-size:22px; line-height:1.2; margin:8px 0}
+  p{margin:8px 0}
+  .long{font-weight:500}
+  .label{text-transform:uppercase; letter-spacing:.1em; color:var(--navy); font-size:12px; margin:0}
+  .pills{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0}
+  .pill{background:var(--mustard); color:var(--navy); border-radius:999px; padding:4px 13px; font-size:13px}
+  .pill.navy{background:var(--navy); color:var(--white)}
+  .icons{font-size:34px; display:flex; gap:10px; margin-top:16px}
+
+  button{font:inherit; cursor:pointer}
+  .btn{background:var(--red); color:var(--white); border:0; border-radius:999px; padding:10px 24px;
+    text-transform:uppercase; letter-spacing:.1em; font-size:14px; box-shadow:3px 3px 0 var(--navy); transition:transform .12s, box-shadow .12s}
+  .btn:hover:not(:disabled){transform:translate(-1px,-1px); box-shadow:5px 5px 0 var(--navy)}
+  .btn:active:not(:disabled){transform:translate(2px,2px); box-shadow:1px 1px 0 var(--navy)}
+  .btn:disabled{background:var(--greige); color:var(--black); box-shadow:none; cursor:not-allowed}
+  .btn.navy{background:var(--navy); box-shadow:3px 3px 0 var(--mustard)}
+  .btn.navy:hover:not(:disabled){box-shadow:5px 5px 0 var(--mustard)}
+  .btn:focus-visible,.opt:focus-visible,.word:focus-visible,.blank:focus-visible,.tog:focus-visible,a:focus-visible{outline:3px solid var(--blue); outline-offset:2px}
+
+  /* start + end screens */
+  .split{position:absolute; inset:0; display:grid; grid-template-columns:46% 1fr; gap:22px; align-items:center}
+  .split .panel{position:relative; background:var(--cream); border:3px solid var(--navy); border-radius:22px;
+    box-shadow:7px 7px 0 var(--mustard); padding:20px 22px; margin-right:8px}
+  .score{font-family:'Archivo Black','Arial Black',sans-serif; font-size:84px; color:var(--blue); line-height:1}
+  .score small{font-size:.42em; color:var(--navy)}
+  .chars{display:grid; gap:10px}
+  .char{background:var(--navy); color:var(--white); border-radius:18px; padding:12px 16px; display:grid; grid-template-columns:auto 1fr; column-gap:14px; align-items:center}
+  .char.red{background:var(--red)}
+  .char .num{font-family:'Archivo Black','Arial Black',sans-serif; font-size:40px; line-height:1; grid-row:span 2}
+  .char .name{text-transform:uppercase; letter-spacing:.1em; font-size:14px}
+  .char .desc{font-weight:500; font-size:13.5px}
+
+  /* question pieces */
+  .qtype{display:inline-block; background:var(--mustard); color:var(--navy); border-radius:999px; padding:2px 12px; font-size:11.5px; text-transform:uppercase; letter-spacing:.1em}
+  .scenario{background:var(--sand); border-radius:16px; padding:11px 13px; margin:9px 0; font-weight:500; font-size:14px; border-left:7px solid var(--blue)}
+  .post{background:var(--cream); border:2px solid var(--navy); border-radius:13px; padding:8px 11px; margin:7px 0 2px; font-weight:600; color:var(--navy)}
+  .case{border:3px solid var(--blue); border-radius:18px; margin:9px 0; overflow:hidden; background:var(--sand)}
+  .case-head{background:var(--navy); color:var(--white); padding:5px 13px; text-transform:uppercase; letter-spacing:.1em; font-size:11px; display:flex; justify-content:space-between; gap:6px}
+  .case-body{padding:9px 13px; font-weight:500; font-size:13.5px}
+  .case-links{display:flex; flex-wrap:wrap; gap:8px; padding:0 13px 11px}
+  .link{display:inline-block; background:var(--blue); color:var(--white); text-decoration:none; border-radius:999px; padding:5px 13px; font-size:12.5px}
+  .link.alt{background:var(--navy)} .link:hover{background:var(--navy)} .link.alt:hover{background:var(--blue)}
+  .question{font-size:18px; color:var(--navy); margin:6px 0 2px; line-height:1.3}
+  .hint{font-weight:500; font-size:13px; margin:2px 0 0}
+
+  .opts{display:grid; gap:8px}
+  .opt{display:flex; gap:10px; align-items:flex-start; text-align:left; width:100%; background:var(--cream); color:var(--navy);
+    border:3px solid var(--navy); border-radius:18px; padding:8px 13px; font-weight:600; font-size:14.5px; transition:background .12s}
+  .opt:hover:not(:disabled){background:var(--sand)}
+  .opt .mark{flex:none; width:23px; height:23px; border-radius:50%; border:2.5px solid var(--navy); display:grid; place-items:center; font-size:12px; line-height:1; background:var(--cream); color:var(--navy)}
+  .opt.multi .mark{border-radius:7px}
+  .opt.sel{background:var(--mustard)} .opt.sel .mark{background:var(--navy); color:var(--white)}
+  .opt:disabled{cursor:default}
+  .opt.right{background:var(--navy); color:var(--white)} .opt.right .mark{background:var(--white); color:var(--navy); border-color:var(--white)}
+  .opt.wrong{background:var(--red); color:var(--white); border-color:var(--red)} .opt.wrong .mark{background:var(--white); color:var(--red); border-color:var(--white)}
+  .opt.missed{border-style:dashed; border-color:var(--blue)}
+  .tf{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .tf .opt{justify-content:center; font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; font-size:24px; padding:26px 10px}
+
+  .sort{display:grid; grid-template-columns:1fr 1fr; gap:7px}
+  .row{background:var(--sand); border-radius:16px; padding:5px 11px 6px; border:3px solid var(--sand)}
+  .row .txt{color:var(--navy); margin-bottom:4px; font-size:14px; line-height:1.3}
+  .togs{display:flex; flex-wrap:wrap; gap:7px}
+  .tog{background:var(--cream); color:var(--navy); border:2px solid var(--navy); border-radius:999px; padding:3px 12px; font-size:13px}
+  .tog.sel{background:var(--mustard)} .tog:disabled{cursor:default}
+  .row.right{border-color:var(--navy)} .row.wrong{border-color:var(--red)}
+  .row .why{font-weight:500; font-size:13px; margin-top:7px}
+  .tagok{color:var(--navy)} .tagno{color:var(--red)}
+
+  .cloze{background:var(--sand); border-radius:16px; padding:14px 16px; font-size:18px; line-height:2.2; color:var(--navy)}
+  .blank{display:inline-block; min-width:110px; text-align:center; background:var(--cream); color:var(--navy); border:3px dashed var(--navy); border-radius:999px; padding:0 12px; line-height:1.6; vertical-align:middle}
+  .blank.filled{border-style:solid; background:var(--mustard)}
+  .blank.right{background:var(--navy); color:var(--white); border-color:var(--navy); border-style:solid}
+  .blank.wrong{background:var(--red); color:var(--white); border-color:var(--red); border-style:solid}
+  .bank{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+  .word{background:var(--cream); color:var(--navy); border:3px solid var(--navy); border-radius:999px; padding:4px 14px}
+  .word:hover:not(:disabled){background:var(--mustard)}
+  .word:disabled{background:var(--greige); border-color:var(--greige); color:var(--black); cursor:default}
+
+  .fb{margin-top:10px; border-radius:16px; padding:10px 14px; background:var(--sand); border-left:9px solid var(--blue); font-size:13.5px}
+  .fb.bad{border-left-color:var(--red)}
+  .fb h3{font-family:'Archivo Black','Arial Black',sans-serif; font-weight:400; margin:0 0 3px; font-size:18px; color:var(--blue)}
+  .fb.bad h3{color:var(--red)}
+  .fb p,.fb li{font-weight:500; margin:4px 0}
+  .fb ul{margin:4px 0 0; padding-left:18px}
+  .fb b{font-weight:600; color:var(--navy)}
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="decor" aria-hidden="true">
+    <svg style="left:-70px;top:150px;width:330px;height:330px" viewBox="0 0 100 100"><path fill="#F0CB91" d="M38 0h24v38h38v24H62v38H38V62H0V38h38z"/></svg>
+    <svg style="right:-110px;bottom:-120px;width:380px;height:380px" viewBox="0 0 100 100"><path fill="#F0CB91" d="M38 0h24v38h38v24H62v38H38V62H0V38h38z" transform="rotate(45 50 50)"/></svg>
+    <svg style="right:-62px;top:-46px;width:140px;height:140px" viewBox="0 0 100 100"><circle cx="50" cy="50" r="36" fill="none" stroke="#DA9939" stroke-width="22"/></svg>
+    <svg style="left:-66px;bottom:-60px;width:150px;height:150px" viewBox="0 0 100 100"><circle cx="50" cy="50" r="36" fill="none" stroke="#254A6B" stroke-width="22"/></svg>
+  </div>
+  <div class="bar">
+    <div class="course">
+      <svg style="width:22px;height:22px;align-self:center;flex:none" viewBox="0 0 100 100" aria-hidden="true"><g fill="#BD3414"><rect x="42" y="2" width="16" height="96" rx="4"/><rect x="42" y="2" width="16" height="96" rx="4" transform="rotate(45 50 50)"/><rect x="42" y="2" width="16" height="96" rx="4" transform="rotate(90 50 50)"/><rect x="42" y="2" width="16" height="96" rx="4" transform="rotate(135 50 50)"/></g></svg>
+      <span class="course-name">Beyond the Feed</span>
+      <span class="course-tag">From Social Media Consumers to Digital Advocates</span>
+    </div>
+    <div class="bar-right" id="barRight"></div>
+  </div>
+  <main id="app"></main>
+</div>
+
+<script>
+const QUIZ = {
+  number: 1,
+  total: 3,
+  concept: 'Fake News',
+  subtitle: 'Can you spot what makes it fake?',
+  intro: "Now it's time for a quick quiz! It will help you identify at least two unique characteristics of fake news.",
+  next: 'Next up: watch Video 2 to learn about misinformation.',
+  characteristics: [
+    { name: 'Entirely fabricated', desc: 'The whole story is invented. There is no credible source, no official record and no real evidence behind it.' },
+    { name: 'Made on purpose', desc: 'It is not a mistake or a misunderstanding. Someone created the untrue story intentionally.' }
+  ],
+  questions: [
+    {
+      type: 'mc', label: 'Scenario',
+      scenario: 'This post is spreading fast in your course WhatsApp group:',
+      post: '🚨 CONFIRMED: the university has cancelled ALL final exams this semester! Share before they delete this!',
+      scenario2: 'You check the university website and your student email. There is no announcement anywhere. Later, the admin of the page that first posted it admits they made the story up to gain followers.',
+      q: 'Which statement best explains why this is fake news?',
+      options: [
+        { t: 'The whole story was invented on purpose, and there is no real evidence behind it.', ok: true,
+          why: 'This names both characteristics: the story is entirely fabricated (no official announcement exists) and it was made on purpose (the admin invented it to gain followers).' },
+        { t: 'It spread very quickly among a lot of students.', ok: false,
+          why: 'Speed and popularity do not make a story fake. True stories go viral too. What matters is whether the story was invented.' },
+        { t: 'It is about a topic that students care a lot about.', ok: false,
+          why: 'The topic does not decide whether something is fake news. Real exam announcements are also about topics students care about.' },
+        { t: 'The admin misread a real university announcement.', ok: false,
+          why: 'That would be an honest mistake based on something real. Here there was no real announcement at all, and the admin invented the story deliberately.' }
+      ]
+    },
+    {
+      type: 'multi', label: 'Real case',
+      caseFile: {
+        meta: 'X (Twitter) · 28 November 2022',
+        text: 'Elon Musk posted an image that looked like a screenshot of a CNN broadcast. Its headline claimed CNN had said he "could threaten free speech" on Twitter by letting people speak freely. The post gathered more than 290,000 likes. CNN replied that the headline never appeared on CNN. Fact-checkers traced the image to a website that openly describes itself as a source of fake news and had published it months earlier.',
+        links: [
+          { label: 'Open the original post ↗', url: 'https://twitter.com/elonmusk/status/1597170780130852864' },
+          { label: 'Read the fact-check ↗', url: 'https://leadstories.com/hoax-alert/2022/11/fact-check-CNN-did-not-say-that-elon-musk-could-threaten-free-speech-on-twitter-by-literally-allowing-people-to-speak-freely.html', alt: true }
+        ]
+      },
+      q: 'Which clues show that the headline in the image is fake news?',
+      hint: 'Select ALL that apply.',
+      options: [
+        { t: 'CNN confirmed that the headline never appeared on its channel or website.', ok: true,
+          why: 'Correct clue. There is no official record of the headline, which shows it is entirely fabricated.' },
+        { t: 'The headline was written by a website that makes up stories deliberately.', ok: true,
+          why: 'Correct clue. The story was created on purpose. It was not a reporting mistake.' },
+        { t: 'The post received more than 290,000 likes.', ok: false,
+          why: 'Not a clue. Likes show popularity only. They tell you nothing about whether a story is true or invented.' },
+        { t: 'The image copies the look of a real news channel.', ok: false,
+          why: 'Not a clue on its own. Real news looks like this too. Fake news often borrows a trusted look, so you must check for a real source.' },
+        { t: 'The post was shared by a very famous account.', ok: false,
+          why: 'Not a clue. Anyone, famous or not, can share an invented story. Who shared it does not tell you whether the story is real.' }
+      ]
+    },
+    {
+      type: 'sort', label: 'Sort it',
+      q: 'Is each statement a characteristic of fake news?',
+      hint: 'Choose a side for every statement.',
+      yes: 'Fake news', no: 'Not fake news',
+      items: [
+        { t: 'The entire story is invented.', ok: true, why: 'Fake news is entirely fabricated.' },
+        { t: 'A real event is reported with the wrong date by mistake.', ok: false, why: 'A real event exists and the error is accidental, so it is neither fully invented nor made on purpose.' },
+        { t: 'The untrue story is created on purpose.', ok: true, why: 'Fake news is purpose-made. It is not an accident.' },
+        { t: 'A friend honestly misunderstands a notice and passes it on.', ok: false, why: 'This is a misunderstanding. Fake news is not a mistake.' },
+        { t: 'There is no credible source, official record or real evidence.', ok: true, why: 'With zero factual basis, nothing real stands behind the story.' },
+        { t: 'A true story that you strongly disagree with.', ok: false, why: 'Fake news is about fabrication. A story does not become fake because you dislike it.' }
+      ]
+    },
+    {
+      type: 'tf', label: 'True or false',
+      scenario: 'A classmate tells you:',
+      post: '"If a story is false, it is automatically fake news. It doesn\'t matter whether someone got it wrong by mistake."',
+      q: 'Is your classmate right?',
+      answer: false,
+      trueLabel: 'True', falseLabel: 'False',
+      why: 'Not every false story is fake news. Fake news is not a mistake or a misunderstanding. It is a completely invented story that someone created on purpose. False content that is shared by mistake has a different name, which you will meet in the next video.'
+    },
+    {
+      type: 'cloze', label: 'Fill the gaps',
+      q: 'Complete the definition of fake news.',
+      hint: 'Tap a word to drop it into the next gap. Tap a filled gap to remove the word.',
+      parts: ['Fake news is ', ' information with ', ' factual basis. It is not a ', '. The story is invented ', '.'],
+      answers: ['completely fabricated', 'zero', 'mistake', 'intentionally'],
+      distractors: ['partly true', 'some', 'accidentally', 'joke'],
+      why: 'Fake news is completely fabricated information with zero factual basis. It is not a mistake. The story is invented intentionally.'
+    }
+  ]
+};
+
+/* ============================ ENGINE ============================ */
+const stage = document.getElementById('stage'), app = document.getElementById('app'), barRight = document.getElementById('barRight');
+const SPARK = '<svg viewBox="0 0 100 100" aria-hidden="true"><path fill="#DA9939" d="M50 0C54 32 68 46 100 50C68 54 54 68 50 100C46 68 32 54 0 50C32 46 46 32 50 0Z"/></svg>';
+const DECO = {
+  spark:(c,st)=>`<svg style="position:absolute;${st}" viewBox="0 0 100 100" aria-hidden="true"><path fill="${c}" d="M50 0C54 32 68 46 100 50C68 54 54 68 50 100C46 68 32 54 0 50C32 46 46 32 50 0Z"/></svg>`,
+  zig:(st)=>`<svg style="position:absolute;${st}" viewBox="0 0 120 30" aria-hidden="true"><path d="M4 22L24 6L44 22L64 6L84 22L104 6L116 16" fill="none" stroke="#DA9939" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  check:(st)=>`<svg style="position:absolute;${st}" viewBox="0 0 4 4" aria-hidden="true"><rect width="4" height="4" fill="#FFFFFF"/><g fill="#000000"><rect width="1" height="1"/><rect x="2" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/></g></svg>`
+};
+let S = { i: 0, score: 0 };
+
+/* Fit the 16:9 stage to the window or iframe, capped at a normal video-player size */
+function fit(){
+  const W = window.innerWidth, H = window.innerHeight;
+  const s = Math.min(W/960, H/540);
+  stage.style.transform = `scale(${s})`;
+  stage.style.left = Math.max(0, (W - 960*s)/2) + 'px';
+  stage.style.top = '0px';
+}
+window.addEventListener('resize', fit); fit();
+
+function shuffle(arr){ const a = arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+
+function renderStart(){
+  barRight.innerHTML = '';
+  app.innerHTML = `
+    <div class="split">
+      <div>
+        <span class="banner">Quiz ${QUIZ.number} of ${QUIZ.total} · Practice${SPARK}</span>
+        <h1 class="hero${QUIZ.concept.length>10?' long':''}">${QUIZ.concept}</h1>
+        <p class="subtitle">${QUIZ.subtitle}</p>
+        <div class="icons" aria-hidden="true">👍 💬 ❤️ 📣</div>
+        ${DECO.zig('left:250px;top:330px;width:110px;height:28px')}
+        ${DECO.spark('#296EB5','left:392px;top:40px;width:34px;height:34px')}
+      </div>
+      <section class="panel">
+        <p class="label">Your mission</p>
+        <h2>Quick quiz time!</h2>
+        <p class="long">${QUIZ.intro}</p>
+        <div class="pills"><span class="pill">${QUIZ.questions.length} questions</span><span class="pill">About 5 minutes</span><span class="pill navy">Not graded</span></div>
+        <p class="long">You get feedback after every question. If you answer wrongly, you will see why, so use it to sharpen your understanding.</p>
+        <p style="margin-top:14px"><button class="btn" id="go">Start quiz</button></p>
+        ${DECO.check('right:-14px;top:-16px;width:36px;height:36px')}
+      </section>
+    </div>`;
+  document.getElementById('go').onclick = () => { S = { i:0, score:0 }; renderQ(); };
+}
+
+function contextHTML(q){
+  let h = '';
+  if(q.scenario || q.post || q.scenario2){
+    h += `<div class="scenario">${q.scenario ? `<div>${q.scenario}</div>` : ''}${q.post ? `<div class="post">${q.post}</div>` : ''}${q.scenario2 ? `<div style="margin-top:7px">${q.scenario2}</div>` : ''}</div>`;
+  }
+  if(q.caseFile){
+    const c = q.caseFile;
+    h += `<div class="case"><div class="case-head"><span>Real case</span><span>${c.meta}</span></div>
+      <div class="case-body">${c.text}</div>
+      <div class="case-links">${c.links.map(l=>`<a class="link${l.alt?' alt':''}" href="${l.url}" target="_blank" rel="noopener noreferrer">${l.label}</a>`).join('')}</div></div>`;
+  }
+  return h;
+}
+
+function renderQ(){
+  const q = QUIZ.questions[S.i], n = QUIZ.questions.length;
+  const ctx = contextHTML(q);
+  barRight.innerHTML = `<span class="banner red">Question ${S.i+1} of ${n}</span>
+    <div class="dots" role="img" aria-label="Question ${S.i+1} of ${n}">${QUIZ.questions.map((_,k)=>`<span class="dot ${k<S.i?'done':k===S.i?'now':''}"></span>`).join('')}</div>`;
+  app.innerHTML = `
+    <section class="card">
+      <div class="main ${ctx?'two':'one'}">
+        <div class="col left">
+          <span class="qtype">${QUIZ.concept} · ${q.label}</span>
+          ${ctx}
+          <p class="question">${q.q}</p>
+          ${q.hint ? `<p class="hint">${q.hint}</p>` : ''}
+        </div>
+        <div class="col right" id="right"><div id="body"></div><div id="fb" aria-live="polite"></div></div>
+      </div>
+      <div class="foot">
+        <button class="btn" id="check" disabled>Check answer</button>
+        <button class="btn navy" id="next" hidden>${S.i===n-1?'See my results':'Next question'}</button>
+      </div>
+    </section>`;
+  const body = document.getElementById('body'), check = document.getElementById('check'), next = document.getElementById('next');
+  const grade = BUILD[q.type](q, body, ready => { check.disabled = !ready; });
+  check.onclick = () => {
+    const r = grade();
+    if(r.correct) S.score++;
+    const fb = document.getElementById('fb');
+    fb.innerHTML = `<div class="fb ${r.correct?'':'bad'}"><h3>${r.correct ? (r.title||'Correct!') : (r.title||'Not quite')}</h3>${r.html}</div>`;
+    check.hidden = true; next.hidden = false; next.focus({preventScroll:true});
+    const right = document.getElementById('right');
+    if(q.type !== 'sort') right.scrollTo({ top: fb.offsetTop - right.offsetTop - 6, behavior:'smooth' });
+  };
+  next.onclick = () => { S.i++; (S.i < n) ? renderQ() : renderEnd(); };
+}
+
+const BUILD = {
+  mc(q, body, ready){
+    const opts = shuffle(q.options); let pick = null;
+    const box = el('<div class="opts"></div>');
+    opts.forEach((o,k)=>{
+      const b = el(`<button class="opt" type="button"><span class="mark">${String.fromCharCode(65+k)}</span><span>${o.t}</span></button>`);
+      b.onclick = () => { pick = k; [...box.children].forEach((c,j)=>c.classList.toggle('sel', j===k)); ready(true); };
+      box.appendChild(b);
+    });
+    body.appendChild(box);
+    return () => {
+      [...box.children].forEach((c,j)=>{ c.disabled = true; c.classList.remove('sel');
+        if(opts[j].ok){ c.classList.add('right'); c.querySelector('.mark').textContent='✓'; }
+        else if(j===pick){ c.classList.add('wrong'); c.querySelector('.mark').textContent='✗'; } });
+      const chosen = opts[pick], right = opts.find(o=>o.ok);
+      return chosen.ok
+        ? { correct:true, html:`<p>${chosen.why}</p>` }
+        : { correct:false, html:`<p><b>Why your answer is wrong:</b> ${chosen.why}</p><p><b>The best answer:</b> ${right.t} ${right.why}</p>` };
+    };
+  },
+
+  multi(q, body, ready){
+    const opts = shuffle(q.options); const sel = new Set();
+    const box = el('<div class="opts"></div>');
+    opts.forEach((o,k)=>{
+      const b = el(`<button class="opt multi" type="button" aria-pressed="false"><span class="mark"></span><span>${o.t}</span></button>`);
+      b.onclick = () => { sel.has(k) ? sel.delete(k) : sel.add(k);
+        b.classList.toggle('sel', sel.has(k)); b.setAttribute('aria-pressed', sel.has(k));
+        b.querySelector('.mark').textContent = sel.has(k) ? '✓' : ''; ready(sel.size>0); };
+      box.appendChild(b);
+    });
+    body.appendChild(box);
+    return () => {
+      let allRight = true; const lines = [];
+      [...box.children].forEach((c,j)=>{ const o = opts[j], chosen = sel.has(j); c.disabled = true; c.classList.remove('sel');
+        if(chosen && o.ok){ c.classList.add('right'); c.querySelector('.mark').textContent='✓'; }
+        else if(chosen && !o.ok){ c.classList.add('wrong'); c.querySelector('.mark').textContent='✗'; allRight=false;
+          lines.push(`<li><b>You selected:</b> "${o.t}" ${o.why}</li>`); }
+        else if(!chosen && o.ok){ c.classList.add('missed'); allRight=false;
+          lines.push(`<li><b>You missed:</b> "${o.t}" ${o.why}</li>`); }
+      });
+      const rights = opts.filter(o=>o.ok);
+      return allRight
+        ? { correct:true, html:`<p>You found every real clue and ignored the distractions.</p><ul>${rights.map(o=>`<li>${o.why}</li>`).join('')}</ul>` }
+        : { correct:false, html:`<ul>${lines.join('')}</ul><p><b>Remember:</b> the real clues are the ones that show the story is entirely fabricated and made on purpose.</p>` };
+    };
+  },
+
+  sort(q, body, ready){
+    const items = shuffle(q.items); const ans = new Array(items.length).fill(null);
+    const box = el('<div class="sort"></div>');
+    items.forEach((it,k)=>{
+      const r = el(`<div class="row"><div class="txt">${it.t}</div><div class="togs">
+        <button class="tog" type="button" data-v="1">${q.yes}</button>
+        <button class="tog" type="button" data-v="0">${q.no}</button></div></div>`);
+      r.querySelectorAll('.tog').forEach(t => t.onclick = () => {
+        ans[k] = t.dataset.v === '1';
+        r.querySelectorAll('.tog').forEach(x=>x.classList.toggle('sel', x===t));
+        ready(ans.every(a=>a!==null));
+      });
+      box.appendChild(r);
+    });
+    body.appendChild(box);
+    return () => {
+      let wrong = 0;
+      [...box.children].forEach((r,k)=>{ const it = items[k], ok = ans[k]===it.ok; if(!ok) wrong++;
+        r.classList.add(ok?'right':'wrong'); r.querySelectorAll('.tog').forEach(t=>t.disabled=true);
+        r.appendChild(el(`<div class="why"><span class="${ok?'tagok':'tagno'}"><b>${ok?'✓ Correct.':'✗ This one is '+(it.ok?q.yes.toLowerCase():q.no.toLowerCase())+'.'}</b></span> ${it.why}</div>`));
+      });
+      return wrong===0
+        ? { correct:true, html:`<p>All ${items.length} sorted correctly. Fake news is entirely fabricated and made on purpose. Mistakes, misunderstandings and true stories you dislike do not count.</p>` }
+        : { correct:false, title:`${items.length-wrong} of ${items.length} correct`, html:`<p>Check the explanations under each statement above. The test is always the same two questions: Is the whole story invented? Was it made on purpose?</p>` };
+    };
+  },
+
+  tf(q, body, ready){
+    let pick = null;
+    const box = el(`<div class="tf"><button class="opt" type="button">${q.trueLabel}</button><button class="opt" type="button">${q.falseLabel}</button></div>`);
+    const btns = [...box.children];
+    btns.forEach((b,k)=> b.onclick = () => { pick = (k===0); btns.forEach((c,j)=>c.classList.toggle('sel', j===k)); ready(true); });
+    body.appendChild(box);
+    return () => {
+      btns.forEach((b,k)=>{ const val = (k===0); b.disabled = true; b.classList.remove('sel');
+        if(val===q.answer) b.classList.add('right'); else if(val===pick) b.classList.add('wrong'); });
+      const correct = pick===q.answer;
+      return { correct, html:`<p>${correct?'':'<b>The answer is '+(q.answer?q.trueLabel:q.falseLabel)+'.</b> '}${q.why}</p>` };
+    };
+  },
+
+  cloze(q, body, ready){
+    const fills = new Array(q.answers.length).fill(null);
+    const words = shuffle(q.answers.concat(q.distractors));
+    const sent = el('<div class="cloze"></div>');
+    q.parts.forEach((p,k)=>{
+      sent.appendChild(document.createTextNode(p));
+      if(k < q.answers.length){ const b = el(`<button class="blank" type="button" data-k="${k}" aria-label="Gap ${k+1}, empty">&nbsp;</button>`); sent.appendChild(b); }
+    });
+    const bank = el('<div class="bank"></div>');
+    words.forEach(w => bank.appendChild(el(`<button class="word" type="button">${w}</button>`)));
+    const blanks = () => [...sent.querySelectorAll('.blank')];
+    const sync = () => {
+      blanks().forEach((b,k)=>{ b.textContent = fills[k] || ' '; b.classList.toggle('filled', !!fills[k]); b.setAttribute('aria-label', `Gap ${k+1}, ${fills[k]||'empty'}`); });
+      [...bank.children].forEach(w => w.disabled = fills.includes(w.textContent));
+      ready(fills.every(Boolean));
+    };
+    bank.onclick = e => { const w = e.target.closest('.word'); if(!w || w.disabled) return; const k = fills.indexOf(null); if(k<0) return; fills[k] = w.textContent; sync(); };
+    sent.onclick = e => { const b = e.target.closest('.blank'); if(!b || b.disabled) return; fills[+b.dataset.k] = null; sync(); };
+    body.appendChild(sent); body.appendChild(bank);
+    return () => {
+      let wrong = 0;
+      blanks().forEach((b,k)=>{ const ok = fills[k]===q.answers[k]; if(!ok) wrong++; b.disabled = true; b.classList.remove('filled'); b.classList.add(ok?'right':'wrong'); });
+      [...bank.children].forEach(w=>w.disabled=true);
+      return wrong===0
+        ? { correct:true, html:`<p>${q.why}</p>` }
+        : { correct:false, title:`${q.answers.length-wrong} of ${q.answers.length} gaps correct`, html:`<p><b>The full definition:</b> ${q.why}</p>` };
+    };
+  }
+};
+
+function renderEnd(){
+  const n = QUIZ.questions.length, s = S.score;
+  const msg = s===n ? 'Perfect score! You clearly know what makes ' + QUIZ.concept.toLowerCase() + ' what it is.'
+            : s>=n-2 ? 'Nice work! Review the two characteristics to lock them in.'
+            : 'Good effort. This quiz is for practice, so read the recap and try again.';
+  barRight.innerHTML = `<span class="banner">Quiz ${QUIZ.number} of ${QUIZ.total} · Complete</span>`;
+  app.innerHTML = `
+    <section class="card">
+      <div class="main two" style="grid-template-columns:36% 1fr; align-items:center">
+        <div class="col left">
+          <p class="label">Your result</p>
+          <div class="score">${s}<small> / ${n}</small></div>
+          <p class="long">${msg}</p>
+        </div>
+        <div class="col right">
+          <p class="subtitle" style="margin-top:0">The two unique characteristics of ${QUIZ.concept.toLowerCase()}</p>
+          <div class="chars">
+            ${QUIZ.characteristics.map((c,k)=>`<div class="char ${k%2?'red':''}"><div class="num">${k+1}</div><div class="name">${c.name}</div><div class="desc">${c.desc}</div></div>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="foot"><span class="note">${QUIZ.next}</span><button class="btn" id="again">Try again</button></div>
+    </section>`;
+  document.getElementById('again').onclick = renderStart;
+}
+
+renderStart();
+</script>
+</body>
+</html>

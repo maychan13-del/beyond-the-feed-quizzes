@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Not Everything In Your Feed Is True — Fact-Check Detective</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Single Font Family: Archivo (Black 900, SemiBold 600, Medium 500) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;900&display=swap" rel="stylesheet">
+    <style>
+        /* =====================================================================
+           DESIGN TOKENS — STRICT 10-COLOUR RETRO-MODERN SOCIAL-MEDIA PALETTE
+           ===================================================================== */
+        :root {
+            --brick-red: #BD3414;
+            --mustard-gold: #DA9939;
+            --navy: #254A6B;
+            --bright-blue: #296EB5;
+            --light-cream: #F6D7A5;
+            --sand-peach: #F0CB91;
+            --warm-greige: #C1B7AE;
+            --dark-gold: #B46B00;
+            --ink-black: #000000;
+            --pure-white: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Archivo', 'Arial Black', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-cream);
+            color: var(--ink-black);
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Moodle Iframe Embed Optimization */
+        html, body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        /* Typography Hierarchy */
+        .font-black-display {
+            font-family: 'Archivo', 'Arial Black', sans-serif;
+            font-weight: 900;
+        }
+
+        .font-semi {
+            font-family: 'Archivo', Arial, sans-serif;
+            font-weight: 600;
+        }
+
+        .font-med {
+            font-family: 'Archivo', Arial, sans-serif;
+            font-weight: 500;
+        }
+
+        .banner-label {
+            font-family: 'Archivo', Arial, sans-serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .hero-tilt {
+            transform: rotate(-1.5deg);
+        }
+
+        /* Content Card & Wavy Blob Frames */
+        .retro-card {
+            background-color: var(--light-cream);
+            border: 4px solid var(--navy);
+            border-radius: 28px;
+            box-shadow: 0 10px 0 var(--navy);
+        }
+
+        .blob-frame {
+            border-radius: 44% 56% 49% 51% / 53% 44% 56% 47%;
+            border: 6px solid var(--navy);
+            background-color: var(--sand-peach);
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .blob-frame:hover {
+            transform: scale(1.03);
+        }
+
+        .blob-frame-blue {
+            border-radius: 54% 46% 52% 48% / 44% 55% 45% 56%;
+            border: 6px solid var(--bright-blue);
+            background-color: var(--sand-peach);
+            overflow: hidden;
+            transition: transform 0.2s ease;
+        }
+
+        .blob-frame-blue:hover {
+            transform: scale(1.03);
+        }
+
+        /* Uploadable Photo Frame */
+        .evidence-photo-frame {
+            border: 4px solid var(--bright-blue);
+            border-radius: 22px;
+            background-color: var(--pure-white);
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        .evidence-photo-frame:hover {
+            transform: translateY(-2px);
+            border-color: var(--brick-red);
+        }
+
+        /* Warm Greige / Cream Soft Wash over Faded Photos */
+        .photo-warm-wash {
+            position: relative;
+        }
+        .photo-warm-wash::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-color: var(--warm-greige);
+            opacity: 0.22;
+            pointer-events: none;
+        }
+
+        .evidence-photo-frame:hover {
+            transform: translateY(-2px);
+            border-color: var(--brick-red);
+        }
+
+        /* Interactive Pill Buttons */
+        .pill-btn {
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .pill-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .pill-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Interactive Clue Pills */
+        .clue-target {
+            background-color: var(--mustard-gold);
+            color: var(--ink-black);
+            border: 2px solid var(--navy);
+            border-radius: 9999px;
+            padding: 6px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .clue-target:hover {
+            transform: scale(1.03);
+        }
+
+        .clue-target.found {
+            background-color: var(--bright-blue);
+            color: var(--pure-white);
+            border-color: var(--navy);
+        }
+
+        /* Embedded "+" Hotspot Buttons on the News */
+        .plus-hotspot {
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            background-color: var(--brick-red);
+            color: var(--pure-white);
+            border: 3px solid var(--pure-white);
+            box-shadow: 0 3px 0 var(--navy);
+            font-weight: 900;
+            font-size: 18px;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+
+        .plus-hotspot:hover {
+            transform: scale(1.12);
+        }
+
+        .plus-hotspot.found {
+            background-color: var(--bright-blue);
+        }
+
+        /* Form Inputs & Selects */
+        select, textarea {
+            background-color: var(--light-cream);
+            border: 3px solid var(--navy);
+            border-radius: 18px;
+            color: var(--ink-black);
+            font-family: 'Archivo', Arial, sans-serif;
+            font-weight: 600;
+            outline: none;
+        }
+
+        select:focus, textarea:focus {
+            border-color: var(--bright-blue);
+        }
+
+        /* Background Flat Decorative Layer */
+        .bg-decor-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        /* Screen Switch Transitions */
+        .game-screen {
+            display: none;
+            animation: popIn 0.28s ease-out;
+        }
+
+        .game-screen.active {
+            display: block;
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Print Dossier Rules */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: #FFFFFF !important;
+            }
+            .retro-card {
+                box-shadow: none !important;
+                border: 2px solid #254A6B !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen relative">
+
+    <!-- =====================================================================
+         FLAT GEOMETRIC DECORATIONS LAYER (PALETTE COLOURS ONLY)
+         ===================================================================== -->
+    <div class="bg-decor-layer" aria-hidden="true">
+        <!-- Very large faded X/Plus shapes in Sand Peach (#F0CB91) -->
+        <svg class="absolute -top-12 -left-12 w-72 h-72 opacity-80" viewBox="0 0 200 200">
+            <path d="M35 15 L100 80 L165 15 L185 35 L120 100 L185 165 L165 185 L100 120 L35 185 L15 165 L80 100 L15 35 Z" fill="#F0CB91"/>
+        </svg>
+        <svg class="absolute bottom-8 -right-10 w-80 h-80 opacity-80" viewBox="0 0 200 200">
+            <path d="M80 10 H120 V80 H190 V120 H120 V190 H80 V120 H10 V80 H80 Z" fill="#F0CB91"/>
+        </svg>
+
+        <!-- Thick Half-Ring "C" Shapes cropped at edges -->
+        <svg class="hidden sm:block absolute top-1/3 -left-14 w-32 h-56" viewBox="0 0 120 220">
+            <path d="M 10 20 A 90 90 0 0 1 10 200" fill="none" stroke="#DA9939" stroke-width="26" stroke-linecap="round"/>
+        </svg>
+        <svg class="hidden sm:block absolute top-16 -right-12 w-28 h-48" viewBox="0 0 120 220">
+            <path d="M 110 20 A 90 90 0 0 0 110 200" fill="none" stroke="#254A6B" stroke-width="24" stroke-linecap="round"/>
+        </svg>
+
+        <!-- 8-Point Asterisks (Brick Red & Black) -->
+        <svg class="absolute top-24 left-8 w-10 h-10" viewBox="0 0 100 100">
+            <path d="M44 5 H56 V95 H44 Z M5 44 H95 V56 H5 Z M16 24 L24 16 L84 76 L76 84 Z M76 16 L84 24 L24 84 L16 76 Z" fill="#BD3414"/>
+        </svg>
+        <svg class="hidden md:block absolute bottom-28 left-12 w-8 h-8" viewBox="0 0 100 100">
+            <path d="M44 5 H56 V95 H44 Z M5 44 H95 V56 H5 Z M16 24 L24 16 L84 76 L76 84 Z M76 16 L84 24 L24 84 L16 76 Z" fill="#000000"/>
+        </svg>
+
+        <!-- 4-Point Sparkle Stars (Bright Blue & Mustard Gold) -->
+        <svg class="absolute top-14 right-24 w-9 h-9" viewBox="0 0 100 100">
+            <path d="M50 0 L62 38 L100 50 L62 62 L50 100 L38 62 L0 50 L38 38 Z" fill="#296EB5"/>
+        </svg>
+        <svg class="absolute bottom-20 right-24 w-8 h-8" viewBox="0 0 100 100">
+            <path d="M50 0 L62 38 L100 50 L62 62 L50 100 L38 62 L0 50 L38 38 Z" fill="#DA9939"/>
+        </svg>
+
+        <!-- Mustard Zigzag Wave Line -->
+        <svg class="hidden lg:block absolute top-1/2 right-6 w-24 h-10" viewBox="0 0 120 40">
+            <polyline points="5,30 25,10 45,30 65,10 85,30 105,10" fill="none" stroke="#DA9939" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+
+        <!-- Pinwheel / Bow-Tie Accent -->
+        <svg class="hidden md:block absolute top-44 left-1/2 w-10 h-10" viewBox="0 0 100 100">
+            <polygon points="10,20 50,50 10,80" fill="#296EB5"/>
+            <polygon points="90,20 50,50 90,80" fill="#BD3414"/>
+        </svg>
+
+        <!-- Small Black & White Checkered Square -->
+        <svg class="hidden sm:block absolute bottom-10 left-1/3 w-9 h-9" viewBox="0 0 40 40">
+            <rect x="0" y="0" width="20" height="20" fill="#000000"/>
+            <rect x="20" y="0" width="20" height="20" fill="#FFFFFF"/>
+            <rect x="0" y="20" width="20" height="20" fill="#FFFFFF"/>
+            <rect x="20" y="20" width="20" height="20" fill="#000000"/>
+        </svg>
+    </div>
+
+    <!-- =====================================================================
+         MAIN APP CONTAINER
+         ===================================================================== -->
+    <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+
+        <!-- TOP HUD BAR -->
+        <header class="no-print flex flex-wrap items-center justify-between gap-3 mb-6 bg-[#F0CB91] border-4 border-[#254A6B] rounded-full px-4 sm:px-6 py-3">
+            <!-- Brand Pill -->
+            <button onclick="goToScreen(0)" class="flex items-center gap-2.5 text-left cursor-pointer">
+                <span class="w-9 h-9 rounded-full bg-[#BD3414] text-[#FFFFFF] flex items-center justify-center font-black-display text-lg">
+                    !
+                </span>
+                <span class="font-black-display text-base sm:text-lg text-[#254A6B] tracking-tight">
+                    FACT-CHECK DETECTIVE
+                </span>
+            </button>
+
+            <!-- Step Pills -->
+            <nav class="flex items-center gap-1.5 sm:gap-2" aria-label="Investigation Steps">
+                <button onclick="goToScreen(1)" id="nav-pill-1" class="pill-btn banner-label text-xs px-3 py-1.5 bg-[#F6D7A5] text-[#254A6B] border-2 border-[#254A6B]">
+                    1. Scan
+                </button>
+                <button onclick="goToScreen(2)" id="nav-pill-2" class="pill-btn banner-label text-xs px-3 py-1.5 bg-[#F6D7A5] text-[#254A6B] border-2 border-[#254A6B]">
+                    2. Harm
+                </button>
+                <button onclick="goToScreen(3)" id="nav-pill-3" class="pill-btn banner-label text-xs px-3 py-1.5 bg-[#F6D7A5] text-[#254A6B] border-2 border-[#254A6B]">
+                    3. Voices
+                </button>
+                <button onclick="goToScreen(4)" id="nav-pill-4" class="pill-btn banner-label text-xs px-3 py-1.5 bg-[#F6D7A5] text-[#254A6B] border-2 border-[#254A6B]">
+                    4. Action
+                </button>
+            </nav>
+
+            <!-- Score & Audio Pill -->
+            <div class="flex items-center gap-2">
+                <div class="bg-[#254A6B] text-[#FFFFFF] rounded-full px-3.5 py-1.5 flex items-center gap-1.5">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24">
+                        <path d="M12 1L14.8 9.2L23 12L14.8 14.8L12 23L9.2 14.8L1 12L9.2 9.2L12 1Z" fill="#DA9939"/>
+                    </svg>
+                    <span class="banner-label text-xs" id="hud-score">0 PTS</span>
+                </div>
+                <button onclick="toggleSound()" id="sound-btn" class="pill-btn bg-[#DA9939] text-[#000000] border-2 border-[#254A6B] px-3 py-1.5 text-xs banner-label" title="Toggle Sound">
+                    SFX: ON
+                </button>
+            </div>
+        </header>
+
+        <!-- =================================================================
+             SCREEN 0: HERO INTRO SCREEN
+             ================================================================= -->
+        <section id="screen-0" class="game-screen active">
+            <div class="retro-card p-6 sm:p-10 md:p-12 relative overflow-hidden">
+                <!-- Rectangular Title Banner with Sparkle Star -->
+                <div class="inline-flex items-center gap-2 bg-[#254A6B] text-[#FFFFFF] px-4 py-1.5 rounded-xl mb-6 relative">
+                    <span class="banner-label text-xs sm:text-sm">SOCIAL MEDIA DETECTIVE GAME</span>
+                    <svg class="w-5 h-5" viewBox="0 0 24 24">
+                        <path d="M12 1L14.8 9.2L23 12L14.8 14.8L12 23L9.2 14.8L1 12L9.2 9.2L12 1Z" fill="#DA9939"/>
+                    </svg>
+                </div>
+
+                <!-- Hero Grid: Tilted Headline + Uploadable Wavy Blob Frame -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-8">
+                    <div class="lg:col-span-8">
+                        <h1 class="hero-tilt font-black-display text-4xl sm:text-6xl md:text-7xl leading-[0.98] tracking-tight">
+                            <span class="text-[#BD3414] block">NOT EVERYTHING</span>
+                            <span class="text-[#296EB5] block">IN YOUR FEED</span>
+                            <span class="text-[#BD3414] block">IS TRUE!</span>
+                        </h1>
+
+                        <!-- Subtitle in Dark Gold (#B46B00) -->
+                        <p class="font-semi text-lg sm:text-xl text-[#B46B00] max-w-2xl mt-5">
+                            Explore the viral Coke &amp; Pepsi “tracking agents” post: analyze the claim, spot the real-world harm, and hear from everyone involved.
+                        </p>
+                    </div>
+
+                    <!-- Wavy Blob Frame Preview on Home Screen -->
+                    <div class="lg:col-span-4 flex flex-col items-center">
+                        <div id="home-preview-box" onclick="handleSlotClick('a')" class="blob-frame-blue w-64 h-56 sm:w-72 sm:h-60 relative flex flex-col items-center justify-center overflow-hidden cursor-pointer photo-warm-wash" title="Click to zoom in">
+                            <!-- Directly loads image_3b9805.jpg when in the same Moodle folder -->
+                            <img id="home-preview-img" src="./image_3b9805.jpg"
+                                 onload="this.classList.remove('hidden'); document.getElementById('home-default-mockup').classList.add('hidden');"
+                                 onerror="tryFallbackExt(this, 'image_3b9805', 'home')"
+                                 alt="Viral News Screenshot"
+                                 class="w-full h-full object-cover object-top">
+                            <!-- Default Realistic Photo Card on Home Screen (shown only if image_3b9805.jpg is missing) -->
+                            <div id="home-default-mockup" class="hidden w-full h-full relative flex flex-col justify-end p-4 text-left">
+                                <img src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=700&q=80"
+                                     onerror="this.onerror=null;this.src='https://placehold.co/700x500/F0CB91/254A6B?text=Viral+Soda+Post';"
+                                     alt="Cola can close-up"
+                                     class="absolute inset-0 w-full h-full object-cover">
+                                <div class="relative z-10 bg-[#F6D7A5]/95 border-2 border-[#254A6B] rounded-2xl px-3 py-2">
+                                    <span class="banner-label text-[10px] text-[#BD3414] block">VIRAL POST • NOV 2026</span>
+                                    <span class="font-black-display text-xs text-[#254A6B] leading-tight block">“Tracking Agents” in Coke &amp; Pepsi?</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" onclick="handleSlotClick('a')" class="pill-btn mt-2.5 px-3.5 py-1 bg-[#254A6B] text-[#FFFFFF] border-2 border-[#254A6B] banner-label text-[10px]">
+                            TAP TO ZOOM IN
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Feature Strip with Glossy 3D-Styled Social Icons -->
+                <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-2xl p-4 sm:p-5 mb-8 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <!-- Glossy 3D Smartphone SVG -->
+                        <svg class="w-12 h-12 shrink-0" viewBox="0 0 48 48">
+                            <rect x="11" y="4" width="26" height="40" rx="6" fill="#254A6B"/>
+                            <rect x="14" y="8" width="20" height="30" rx="3" fill="#296EB5"/>
+                            <circle cx="24" cy="41" r="1.8" fill="#DA9939"/>
+                            <path d="M17 12L25 12L17 22Z" fill="#FFFFFF" opacity="0.45"/>
+                        </svg>
+                        <div>
+                            <span class="banner-label text-xs text-[#254A6B] block">CASE #2026</span>
+                            <p class="font-semi text-base text-[#000000]">1 viral post. 4 hidden clues. 4 voices.</p>
+                        </div>
+                    </div>
+
+                    <!-- Glossy 3D Social Reaction Icons -->
+                    <div class="flex items-center gap-3">
+                        <!-- Glossy Heart -->
+                        <svg class="w-11 h-11" viewBox="0 0 48 48">
+                            <circle cx="24" cy="24" r="21" fill="#BD3414"/>
+                            <path d="M24 35C24 35 12 27 12 19C12 15.5 14.8 13 18 13C20.4 13 22.6 14.4 24 16.5C25.4 14.4 27.6 13 30 13C33.2 13 36 15.5 36 19C36 27 24 35 24 35Z" fill="#FFFFFF"/>
+                            <ellipse cx="17" cy="14" rx="4" ry="2" transform="rotate(-25 17 14)" fill="#FFFFFF" opacity="0.55"/>
+                        </svg>
+                        <!-- Glossy Thumbs Up -->
+                        <svg class="w-11 h-11" viewBox="0 0 48 48">
+                            <circle cx="24" cy="24" r="21" fill="#296EB5"/>
+                            <path d="M16 23H20V34H16V23ZM33 23.5C33 22.1 31.9 21 30.5 21H25.7L26.5 16.4C26.6 15.8 26.4 15.2 26 14.8L25 14L19.5 19.5C19.2 19.8 19 20.3 19 20.8V31.5C19 32.9 20.1 34 21.5 34H29.2C30.3 34 31.2 33.3 31.5 32.3L33.4 25.3C33.5 24.7 33 23.5 33 23.5Z" fill="#FFFFFF"/>
+                            <ellipse cx="17" cy="14" rx="4" ry="2" transform="rotate(-25 17 14)" fill="#FFFFFF" opacity="0.55"/>
+                        </svg>
+                        <!-- Glossy Megaphone -->
+                        <svg class="w-11 h-11" viewBox="0 0 48 48">
+                            <circle cx="24" cy="24" r="21" fill="#DA9939"/>
+                            <path d="M14 21H20L31 15V33L20 27H14V21Z" fill="#254A6B"/>
+                            <rect x="16" y="27" width="4" height="7" rx="2" fill="#BD3414"/>
+                            <ellipse cx="17" cy="14" rx="4" ry="2" transform="rotate(-25 17 14)" fill="#FFFFFF" opacity="0.65"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Step Roadmap Pills with Curved Brick-Red Arrows -->
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-9">
+                    <span class="banner-label text-xs px-4 py-2 rounded-full bg-[#DA9939] text-[#000000]">1. SCAN POST</span>
+                    <svg class="w-7 h-5" viewBox="0 0 32 20"><path d="M2 14 Q16 2 28 12 M22 6 L29 12 L21 15" fill="none" stroke="#BD3414" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="banner-label text-xs px-4 py-2 rounded-full bg-[#F0CB91] border-2 border-[#254A6B] text-[#000000]">2. SPOT HARM</span>
+                    <svg class="w-7 h-5" viewBox="0 0 32 20"><path d="M2 14 Q16 2 28 12 M22 6 L29 12 L21 15" fill="none" stroke="#BD3414" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="banner-label text-xs px-4 py-2 rounded-full bg-[#F0CB91] border-2 border-[#254A6B] text-[#000000]">3. HEAR VOICES</span>
+                    <svg class="w-7 h-5" viewBox="0 0 32 20"><path d="M2 14 Q16 2 28 12 M22 6 L29 12 L21 15" fill="none" stroke="#BD3414" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="banner-label text-xs px-4 py-2 rounded-full bg-[#F0CB91] border-2 border-[#254A6B] text-[#000000]">4. TAKE ACTION</span>
+                </div>
+
+                <!-- Main CTA Button -->
+                <button onclick="startGame()" class="pill-btn bg-[#BD3414] text-[#FFFFFF] px-8 py-4 text-lg sm:text-xl font-black-display tracking-wide inline-flex items-center gap-3 shadow-md">
+                    <span>LET'S START</span>
+                    <svg class="w-6 h-6" viewBox="0 0 24 24">
+                        <path d="M5 12H19M13 6L19 12L13 18" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SCREEN 1: ANALYZE THE SCENARIO (UPLOAD PHOTOS + CLUE HUNT)
+             ================================================================= -->
+        <section id="screen-1" class="game-screen">
+            <div class="retro-card p-6 sm:p-8 space-y-6">
+                <!-- Title Banner -->
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="inline-flex items-center gap-2 bg-[#BD3414] text-[#FFFFFF] px-4 py-1.5 rounded-xl">
+                        <span class="banner-label text-xs sm:text-sm">STEP 1 OF 4 • SCAN THE FEED</span>
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path d="M12 1L14.8 9.2L23 12L14.8 14.8L12 23L9.2 14.8L1 12L9.2 9.2L12 1Z" fill="#DA9939"/>
+                        </svg>
+                    </div>
+                    <span class="banner-label text-xs px-3.5 py-1.5 rounded-full bg-[#DA9939] text-[#000000]" id="clue-counter">
+                        0 / 4 CLUES FOUND
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="font-black-display text-2xl sm:text-4xl text-[#BD3414]">
+                        Step 1 &amp; 2: Read the News &amp; Click the “+” Buttons
+                    </h2>
+                    <p class="font-semi text-base sm:text-lg text-[#B46B00] mt-1">
+                        Click the <strong>“+” buttons</strong> embedded on the news cards below to check whether this claim is true or false.
+                    </p>
+                </div>
+
+                <!-- Two-Column Layout: Evidence Slots + Interactive Clue Decoder -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Left 7 Cols: Both Screenshots + Clickable Clue Pills -->
+                    <div class="lg:col-span-7 bg-[#F0CB91] border-4 border-[#254A6B] rounded-3xl p-5 space-y-5">
+                        <!-- Top Bar -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#254A6B] pb-3">
+                            <span class="banner-label text-xs text-[#254A6B]">NEWS SCENARIO (TAP PHOTO TO ZOOM OR CLICK “+”)</span>
+                            <span class="banner-label text-[11px] px-3 py-1 rounded-full bg-[#BD3414] text-[#FFFFFF]">4 “+” HOTSPOTS</span>
+                        </div>
+
+                        <!-- Side-by-Side Photo Frames -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Slot A: News Article Card (Auto-loads image_3b9805.jpg in Moodle folder) -->
+                            <div class="bg-[#F6D7A5] border-3 border-[#254A6B] rounded-2xl p-3 flex flex-col justify-between gap-2.5">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="banner-label text-[10px] px-2.5 py-0.5 rounded-full bg-[#254A6B] text-[#FFFFFF]">PHOTO A • ARTICLE</span>
+                                    <button type="button" onclick="handleSlotClick('a')" class="pill-btn banner-label text-[10px] px-2.5 py-0.5 bg-[#DA9939] text-[#000000]">
+                                        ZOOM IN
+                                    </button>
+                                </div>
+                                <div onclick="handleSlotClick('a')" class="evidence-photo-frame h-56 flex flex-col justify-between text-left">
+                                    <!-- Embedded "+" Hotspot Buttons on Photo A -->
+                                    <button type="button" id="hotspot-1" onclick="event.stopPropagation(); revealClue(1)" class="plus-hotspot absolute top-2.5 left-2.5 z-20" title="Click + to inspect headline claim">+</button>
+                                    <button type="button" id="hotspot-3" onclick="event.stopPropagation(); revealClue(3)" class="plus-hotspot absolute top-2.5 right-2.5 z-20" title="Click + to inspect fact-check badge">+</button>
+
+                                    <!-- Local Moodle Folder Image (image_3b9805.jpg) -->
+                                    <img id="img-slot-a" src="./image_3b9805.jpg"
+                                         onload="activateLocalImage('a', this.src)"
+                                         onerror="tryFallbackExt(this, 'image_3b9805', 'a')"
+                                         alt="Article Screenshot A"
+                                         class="w-full h-full object-cover object-top">
+
+                                    <!-- Default Realistic Article Mockup (Shown only if image_3b9805.jpg is not found) -->
+                                    <div id="default-mockup-a" class="hidden w-full h-full flex flex-col justify-between bg-[#FFFFFF] text-[#000000]">
+                                        <div class="p-2.5 pb-1.5 pt-11 space-y-1">
+                                            <p class="font-black-display text-[11px] leading-tight text-[#000000]">
+                                                Scientists Find Microscopic ‘Tracking Agents’ in Coke and Pepsi—and Paper Trail Leads to Gates Foundation
+                                            </p>
+                                            <div class="flex items-center gap-1 text-[9px] text-[#296EB5] font-semi">
+                                                <span class="inline-block w-3 h-3 rounded-full bg-[#296EB5] text-[#FFFFFF] text-center leading-3">✓</span>
+                                                <span>Fact checked by The People's Voice</span>
+                                            </div>
+                                        </div>
+                                        <div class="relative flex-1 overflow-hidden photo-warm-wash">
+                                            <img src="https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=700&q=80"
+                                                 onerror="this.onerror=null;this.src='https://placehold.co/700x400/C1B7AE/000000?text=Cola+Can+Photo';"
+                                                 alt="Person holding a cola can"
+                                                 class="w-full h-full object-cover">
+                                            <span class="absolute bottom-1.5 right-1.5 z-10 bg-[#254A6B] text-[#FFFFFF] banner-label text-[9px] px-2 py-0.5 rounded-full">
+                                                TAP TO ZOOM
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-xs font-semi text-[#000000]">
+                                    Click the <strong>“+” buttons</strong> on the top corners to inspect the headline and badge.
+                                </p>
+                            </div>
+
+                            <!-- Slot B: Viral Social Media Post Card (Auto-loads image_3b97fd.jpg in Moodle folder) -->
+                            <div class="bg-[#F6D7A5] border-3 border-[#254A6B] rounded-2xl p-3 flex flex-col justify-between gap-2.5">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="banner-label text-[10px] px-2.5 py-0.5 rounded-full bg-[#BD3414] text-[#FFFFFF]">PHOTO B • X POST</span>
+                                    <button type="button" onclick="handleSlotClick('b')" class="pill-btn banner-label text-[10px] px-2.5 py-0.5 bg-[#DA9939] text-[#000000]">
+                                        ZOOM IN
+                                    </button>
+                                </div>
+                                <div onclick="handleSlotClick('b')" class="evidence-photo-frame h-56 flex flex-col justify-between text-left">
+                                    <!-- Embedded "+" Hotspot Buttons on Photo B -->
+                                    <button type="button" id="hotspot-2" onclick="event.stopPropagation(); revealClue(2)" class="plus-hotspot absolute top-2.5 right-2.5 z-20" title="Click + to inspect 2016 → 2018 red arrow">+</button>
+                                    <button type="button" id="hotspot-4" onclick="event.stopPropagation(); revealClue(4)" class="plus-hotspot absolute bottom-2.5 left-2.5 z-20" title="Click + to inspect heated sugar explanation">+</button>
+
+                                    <!-- Local Moodle Folder Image (image_3b97fd.jpg) -->
+                                    <img id="img-slot-b" src="./image_3b97fd.jpg"
+                                         onload="activateLocalImage('b', this.src)"
+                                         onerror="tryFallbackExt(this, 'image_3b97fd', 'b')"
+                                         alt="Social Post Screenshot B"
+                                         class="w-full h-full object-cover object-top">
+
+                                    <!-- Default Realistic Social Post Mockup (Shown only if image_3b97fd.jpg is not found) -->
+                                    <div id="default-mockup-b" class="hidden w-full h-full flex flex-col justify-between bg-[#FFFFFF] text-[#000000]">
+                                        <div class="p-2.5 pb-1 pr-11 space-y-1">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="w-5 h-5 rounded-full bg-[#254A6B] text-[#FFFFFF] text-[9px] font-black-display flex items-center justify-center">X</span>
+                                                <span class="text-[10px] font-black-display text-[#000000]">Viral X post</span>
+                                                <span class="text-[9px] text-[#296EB5] font-semi">(illustration)</span>
+                                            </div>
+                                            <p class="text-[10px] font-semi leading-snug text-[#000000]">
+                                                The post links 2016 carbon nanodot research to a 2018 study of Coke &amp; Pepsi with a big red arrow.
+                                            </p>
+                                        </div>
+                                        <div class="relative flex-1 overflow-hidden photo-warm-wash">
+                                            <img src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=700&q=80"
+                                                 onerror="this.onerror=null;this.src='https://placehold.co/700x400/C1B7AE/000000?text=Lab+Microscope+Photo';"
+                                                 alt="Laboratory microscope samples"
+                                                 class="w-full h-full object-cover">
+                                            <!-- Red Arrow Overlay matching viral post -->
+                                            <div class="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
+                                                <span class="bg-[#BD3414] text-[#FFFFFF] font-black-display text-[10px] px-2.5 py-1 rounded-full border-2 border-[#FFFFFF] shadow">
+                                                    2016 ➔ 2018
+                                                </span>
+                                            </div>
+                                            <span class="absolute bottom-1.5 right-1.5 z-10 bg-[#254A6B] text-[#FFFFFF] banner-label text-[9px] px-2 py-0.5 rounded-full">
+                                                TAP TO ZOOM
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-xs font-semi text-[#000000]">
+                                    Click the <strong>“+” buttons</strong> on the post to inspect the red arrow and study note.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Red-Flag Clue Pills Bar -->
+                        <div class="bg-[#F6D7A5] border-3 border-[#254A6B] rounded-2xl p-4 space-y-3">
+                            <span class="banner-label text-xs text-[#254A6B] block">OR TAP THE 4 “+” CLUE PILLS HERE:</span>
+                            <div class="flex flex-wrap gap-2">
+                                <button onclick="revealClue(1)" id="clue-btn-1" class="clue-target text-xs sm:text-sm">
+                                    + “Tracking Agents”
+                                </button>
+                                <button onclick="revealClue(2)" id="clue-btn-2" class="clue-target text-xs sm:text-sm">
+                                    + “2016 → 2018 Red Arrow”
+                                </button>
+                                <button onclick="revealClue(3)" id="clue-btn-3" class="clue-target text-xs sm:text-sm">
+                                    + “Fake Fact-Check Badge”
+                                </button>
+                                <button onclick="revealClue(4)" id="clue-btn-4" class="clue-target text-xs sm:text-sm">
+                                    + “Heated Sugar Note”
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right 5 Cols: Clue Reality Card -->
+                    <div class="lg:col-span-5 space-y-4">
+                        <div id="clue-decoder-box" class="bg-[#254A6B] text-[#FFFFFF] rounded-3xl p-5 sm:p-6 border-4 border-[#254A6B]">
+                            <div class="flex items-center gap-2 mb-3">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                    <path d="M12 1L14.8 9.2L23 12L14.8 14.8L12 23L9.2 14.8L1 12L9.2 9.2L12 1Z" fill="#DA9939"/>
+                                </svg>
+                                <span class="banner-label text-xs text-[#DA9939]">CLUE DECODER</span>
+                            </div>
+                            <h3 id="clue-title" class="font-black-display text-xl text-[#FFFFFF] mb-2">
+                                Click any “+” button on the news!
+                            </h3>
+                            <p id="clue-explanation" class="font-med text-base text-[#F6D7A5]">
+                                Click the “+” buttons on Photo A or Photo B to check what is true and what is misleading.
+                            </p>
+                        </div>
+
+                        <!-- Mini Logic Quiz Pill Box -->
+                        <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-3">
+                            <span class="banner-label text-xs text-[#BD3414] block">STEP 2 CHECK: TRUE OR FALSE?</span>
+                            <p class="font-semi text-base text-[#000000]">
+                                Is the headline claim (“Coke &amp; Pepsi contain microscopic tracking agents”) simply true or false?
+                            </p>
+                            <div class="space-y-2" id="stage1-quiz-options">
+                                <button onclick="checkStage1Quiz(this, false)" class="pill-btn w-full text-left px-4 py-2.5 bg-[#F6D7A5] border-2 border-[#254A6B] text-sm font-semi text-[#000000]">
+                                    A) Simply True — Scientists found GPS tracking chips in soda
+                                </button>
+                                <button onclick="checkStage1Quiz(this, true)" class="pill-btn w-full text-left px-4 py-2.5 bg-[#F6D7A5] border-2 border-[#254A6B] text-sm font-semi text-[#000000]">
+                                    B) False / Misleading — Heated sugar makes harmless carbon dots, not trackers
+                                </button>
+                            </div>
+                            <p id="stage1-quiz-feedback" class="hidden text-sm font-semi p-3 rounded-2xl"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t-3 border-[#F0CB91]">
+                    <button onclick="goToScreen(0)" class="pill-btn px-5 py-2.5 bg-[#F0CB91] border-2 border-[#254A6B] text-sm font-semi text-[#000000]">
+                        ← Back
+                    </button>
+                    <button onclick="goToScreen(2)" class="pill-btn px-6 py-3 bg-[#BD3414] text-[#FFFFFF] text-base font-black-display">
+                        Next: Spot the Harm →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SCREEN 2: IDENTIFY POTENTIAL HARM
+             ================================================================= -->
+        <section id="screen-2" class="game-screen">
+            <div class="retro-card p-6 sm:p-8 space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="inline-flex items-center gap-2 bg-[#254A6B] text-[#FFFFFF] px-4 py-1.5 rounded-xl">
+                        <span class="banner-label text-xs sm:text-sm">STEP 2 OF 4 • REAL-WORLD HARM</span>
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path d="M12 1L14.8 9.2L23 12L14.8 14.8L12 23L9.2 14.8L1 12L9.2 9.2L12 1Z" fill="#296EB5"/>
+                        </svg>
+                    </div>
+                    <span class="banner-label text-xs px-3.5 py-1.5 rounded-full bg-[#DA9939] text-[#000000]" id="harm-counter">
+                        0 / 4 HARMS SOLVED
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="font-black-display text-2xl sm:text-4xl text-[#296EB5]">
+                        What happens when people share this?
+                    </h2>
+                    <p class="font-semi text-lg sm:text-xl text-[#B46B00] mt-1">
+                        Pick the harm type and impact level for each problem below.
+                    </p>
+                </div>
+
+                <!-- 4 Harm Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5" id="harm-cards-container">
+                    <!-- Harm 1 -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 flex flex-col justify-between gap-4">
+                        <div>
+                            <span class="banner-label text-[11px] text-[#BD3414] block mb-1">PROBLEM #1</span>
+                            <p class="font-semi text-base text-[#000000]">
+                                “Students and parents get scared of normal food science and think drinks have secret trackers.”
+                            </p>
+                        </div>
+                        <div class="space-y-2.5">
+                            <select id="harm-type-1" onchange="checkHarmItem(1)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">1. Pick Harm Type...</option>
+                                <option value="science">Fear &amp; Confusion About Science</option>
+                                <option value="brand">Panic &amp; Wasted Food</option>
+                                <option value="harassment">Online Hate &amp; Bullying</option>
+                                <option value="media">Not Trusting Real News</option>
+                            </select>
+                            <select id="harm-sev-1" onchange="checkHarmItem(1)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">2. How Big Is the Harm?</option>
+                                <option value="high">High — Hurts basic science understanding</option>
+                                <option value="low">Low — Nobody reads food posts</option>
+                            </select>
+                            <div id="harm-msg-1" class="hidden p-3 rounded-2xl text-sm font-semi"></div>
+                        </div>
+                    </div>
+
+                    <!-- Harm 2 -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 flex flex-col justify-between gap-4">
+                        <div>
+                            <span class="banner-label text-[11px] text-[#BD3414] block mb-1">PROBLEM #2</span>
+                            <p class="font-semi text-base text-[#000000]">
+                                “Shoppers film themselves pouring out drinks in stores because of a fake website.”
+                            </p>
+                        </div>
+                        <div class="space-y-2.5">
+                            <select id="harm-type-2" onchange="checkHarmItem(2)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">1. Pick Harm Type...</option>
+                                <option value="science">Fear &amp; Confusion About Science</option>
+                                <option value="brand">Panic &amp; Wasted Food</option>
+                                <option value="harassment">Online Hate &amp; Bullying</option>
+                                <option value="media">Not Trusting Real News</option>
+                            </select>
+                            <select id="harm-sev-2" onchange="checkHarmItem(2)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">2. How Big Is the Harm?</option>
+                                <option value="high">High — Starts viral panic &amp; waste</option>
+                                <option value="low">Low — Only affects one person</option>
+                            </select>
+                            <div id="harm-msg-2" class="hidden p-3 rounded-2xl text-sm font-semi"></div>
+                        </div>
+                    </div>
+
+                    <!-- Harm 3 -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 flex flex-col justify-between gap-4">
+                        <div>
+                            <span class="banner-label text-[11px] text-[#BD3414] block mb-1">PROBLEM #3</span>
+                            <p class="font-semi text-base text-[#000000]">
+                                “Scientists and health workers get angry messages accusing them of secret plots.”
+                            </p>
+                        </div>
+                        <div class="space-y-2.5">
+                            <select id="harm-type-3" onchange="checkHarmItem(3)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">1. Pick Harm Type...</option>
+                                <option value="science">Fear &amp; Confusion About Science</option>
+                                <option value="brand">Panic &amp; Wasted Food</option>
+                                <option value="harassment">Online Hate &amp; Bullying</option>
+                                <option value="media">Not Trusting Real News</option>
+                            </select>
+                            <select id="harm-sev-3" onchange="checkHarmItem(3)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">2. How Big Is the Harm?</option>
+                                <option value="high">High — Causes real online abuse</option>
+                                <option value="low">Low — Comments never hurt anyone</option>
+                            </select>
+                            <div id="harm-msg-3" class="hidden p-3 rounded-2xl text-sm font-semi"></div>
+                        </div>
+                    </div>
+
+                    <!-- Harm 4 -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 flex flex-col justify-between gap-4">
+                        <div>
+                            <span class="banner-label text-[11px] text-[#BD3414] block mb-1">PROBLEM #4</span>
+                            <p class="font-semi text-base text-[#000000]">
+                                “The post mixes real science words with lies, so people stop trusting real news.”
+                            </p>
+                        </div>
+                        <div class="space-y-2.5">
+                            <select id="harm-type-4" onchange="checkHarmItem(4)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">1. Pick Harm Type...</option>
+                                <option value="science">Fear &amp; Confusion About Science</option>
+                                <option value="brand">Panic &amp; Wasted Food</option>
+                                <option value="harassment">Online Hate &amp; Bullying</option>
+                                <option value="media">Not Trusting Real News</option>
+                            </select>
+                            <select id="harm-sev-4" onchange="checkHarmItem(4)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">2. How Big Is the Harm?</option>
+                                <option value="high">High — Makes truth harder to spot</option>
+                                <option value="low">Low — Half-truths are easy to spot</option>
+                            </select>
+                            <div id="harm-msg-4" class="hidden p-3 rounded-2xl text-sm font-semi"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t-3 border-[#F0CB91]">
+                    <button onclick="goToScreen(1)" class="pill-btn px-5 py-2.5 bg-[#F0CB91] border-2 border-[#254A6B] text-sm font-semi text-[#000000]">
+                        ← Back to Scan
+                    </button>
+                    <button onclick="goToScreen(3)" class="pill-btn px-6 py-3 bg-[#BD3414] text-[#FFFFFF] text-base font-black-display">
+                        Next: Hear the Voices →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SCREEN 3: STAKEHOLDER PERSPECTIVES
+             ================================================================= -->
+        <section id="screen-3" class="game-screen">
+            <div class="retro-card p-6 sm:p-8 space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="inline-flex items-center gap-2 bg-[#BD3414] text-[#FFFFFF] px-4 py-1.5 rounded-xl">
+                        <span class="banner-label text-xs sm:text-sm">STEP 3 OF 4 • WHO IS INVOLVED?</span>
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path d="M12 1L14.8 9.2L23 12L14.8 14.8L12 23L9.2 14.8L1 12L9.2 9.2L12 1Z" fill="#DA9939"/>
+                        </svg>
+                    </div>
+                    <span class="banner-label text-xs px-3.5 py-1.5 rounded-full bg-[#DA9939] text-[#000000]" id="stakeholder-counter">
+                        0 / 4 VOICES MATCHED
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="font-black-display text-2xl sm:text-4xl text-[#BD3414]">
+                        Four people, four views.
+                    </h2>
+                    <p class="font-semi text-lg sm:text-xl text-[#B46B00] mt-1">
+                        Choose each person's main goal and what they think about this post.
+                    </p>
+                </div>
+
+                <!-- 4 Stakeholder Cards with Friendly Stylised 3D Cartoon SVG Portraits in Wavy Blob Frames -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- Stakeholder 1: Everyday Social Media User (Maya, 19) -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="blob-frame w-20 h-20 shrink-0 flex items-center justify-center">
+                                <svg class="w-16 h-16" viewBox="0 0 64 64">
+                                    <circle cx="32" cy="24" r="13" fill="#BD3414"/>
+                                    <circle cx="32" cy="26" r="10" fill="#F6D7A5"/>
+                                    <circle cx="28.5" cy="25" r="1.6" fill="#254A6B"/>
+                                    <circle cx="35.5" cy="25" r="1.6" fill="#254A6B"/>
+                                    <path d="M29 30Q32 33 35 30" stroke="#BD3414" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                                    <path d="M16 56C16 45 23 39 32 39C41 39 48 45 48 56" fill="#296EB5"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="banner-label text-[11px] px-2.5 py-0.5 rounded-full bg-[#254A6B] text-[#FFFFFF]">THE PUBLIC</span>
+                                <h3 class="font-black-display text-xl text-[#254A6B] mt-1">Maya, 19 (Student)</h3>
+                                <p class="text-xs font-semi text-[#000000]">Sees the post while drinking a can of cola.</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <select id="stk-goal-1" onchange="checkStakeholder(1)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">1. What does Maya care about?</option>
+                                <option value="health">Staying safe &amp; knowing what is in her drink</option>
+                                <option value="clicks">Getting more website ad clicks</option>
+                            </select>
+                            <select id="stk-quote-1" onchange="checkStakeholder(1)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">2. Pick Maya's thought...</option>
+                                <option value="correct">“Scary words like ‘tracking agents’ make me want to warn friends—I need to check first!”</option>
+                                <option value="wrong">“I write ten scary headlines every day for money.”</option>
+                            </select>
+                            <div id="stk-msg-1" class="hidden p-3 rounded-2xl text-sm font-semi"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stakeholder 2: Sensational Content Creator -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="blob-frame-blue w-20 h-20 shrink-0 flex items-center justify-center">
+                                <svg class="w-16 h-16" viewBox="0 0 64 64">
+                                    <rect x="20" y="10" width="24" height="10" rx="5" fill="#254A6B"/>
+                                    <circle cx="32" cy="26" r="10.5" fill="#F6D7A5"/>
+                                    <rect x="24" y="22" width="6" height="4" rx="1" fill="#254A6B"/>
+                                    <rect x="34" y="22" width="6" height="4" rx="1" fill="#254A6B"/>
+                                    <path d="M28 31L36 29" stroke="#BD3414" stroke-width="2.4" stroke-linecap="round"/>
+                                    <path d="M16 56C16 45 23 39 32 39C41 39 48 45 48 56" fill="#BD3414"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="banner-label text-[11px] px-2.5 py-0.5 rounded-full bg-[#BD3414] text-[#FFFFFF]">CONTENT CREATOR</span>
+                                <h3 class="font-black-display text-xl text-[#254A6B] mt-1">Post Writer</h3>
+                                <p class="text-xs font-semi text-[#000000]">Writes the dramatic headline and red-arrow graphic.</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <select id="stk-goal-2" onchange="checkStakeholder(2)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">1. What does the writer want?</option>
+                                <option value="attention">More clicks, shares, and followers</option>
+                                <option value="lab">Doing real science lab tests</option>
+                            </select>
+                            <select id="stk-quote-2" onchange="checkStakeholder(2)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">2. Pick the writer's thought...</option>
+                                <option value="correct">“Mixing famous names with scary tech words gets thousands of fast shares.”</option>
+                                <option value="wrong">“I want to explain sugar chemistry calmly so nobody panics.”</option>
+                            </select>
+                            <div id="stk-msg-2" class="hidden p-3 rounded-2xl text-sm font-semi"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stakeholder 3: Independent Fact-Checker / Food Chemist -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="blob-frame-blue w-20 h-20 shrink-0 flex items-center justify-center">
+                                <svg class="w-16 h-16" viewBox="0 0 64 64">
+                                    <circle cx="32" cy="23" r="12" fill="#254A6B"/>
+                                    <circle cx="32" cy="26" r="10" fill="#F6D7A5"/>
+                                    <circle cx="28.5" cy="25" r="1.5" fill="#000000"/>
+                                    <circle cx="35.5" cy="25" r="1.5" fill="#000000"/>
+                                    <path d="M28 30Q32 33 36 30" stroke="#296EB5" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                                    <path d="M16 56C16 45 23 39 32 39C41 39 48 45 48 56" fill="#FFFFFF"/>
+                                    <path d="M29 39L32 48L35 39" fill="#296EB5"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="banner-label text-[11px] px-2.5 py-0.5 rounded-full bg-[#296EB5] text-[#FFFFFF]">FACT-CHECKER</span>
+                                <h3 class="font-black-display text-xl text-[#254A6B] mt-1">Dr. Lin (Scientist)</h3>
+                                <p class="text-xs font-semi text-[#000000]">Checks how carbon dots actually form in food.</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <select id="stk-goal-3" onchange="checkStakeholder(3)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">1. What does Dr. Lin care about?</option>
+                                <option value="accuracy">True facts &amp; clear science evidence</option>
+                                <option value="hype">Hiding drink ingredients</option>
+                            </select>
+                            <select id="stk-quote-3" onchange="checkStakeholder(3)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">2. Pick Dr. Lin's thought...</option>
+                                <option value="correct">“Carbon dots form when sugar is heated in bread, coffee, or soda—they cannot track anyone.”</option>
+                                <option value="wrong">“Every tiny particle in food is a secret tracking chip.”</option>
+                            </select>
+                            <div id="stk-msg-3" class="hidden p-3 rounded-2xl text-sm font-semi"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stakeholder 4: Beverage & Public Health Communicator -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-4">
+                        <div class="flex items-center gap-4">
+                            <div class="blob-frame w-20 h-20 shrink-0 flex items-center justify-center">
+                                <svg class="w-16 h-16" viewBox="0 0 64 64">
+                                    <circle cx="32" cy="24" r="12" fill="#DA9939"/>
+                                    <circle cx="32" cy="26" r="10" fill="#F6D7A5"/>
+                                    <circle cx="28.5" cy="25" r="1.5" fill="#254A6B"/>
+                                    <circle cx="35.5" cy="25" r="1.5" fill="#254A6B"/>
+                                    <path d="M28 30Q32 32.5 36 30" stroke="#254A6B" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+                                    <path d="M16 56C16 45 23 39 32 39C41 39 48 45 48 56" fill="#254A6B"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="banner-label text-[11px] px-2.5 py-0.5 rounded-full bg-[#DA9939] text-[#000000]">HEALTH TEAM</span>
+                                <h3 class="font-black-display text-xl text-[#254A6B] mt-1">Safety Team</h3>
+                                <p class="text-xs font-semi text-[#000000]">Answers rumors calmly without spreading them more.</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            <select id="stk-goal-4" onchange="checkStakeholder(4)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">1. What is the Safety Team's goal?</option>
+                                <option value="trust">Sharing clear facts so people feel safe</option>
+                                <option value="ignore">Deleting all ingredient labels</option>
+                            </select>
+                            <select id="stk-quote-4" onchange="checkStakeholder(4)" class="w-full px-4 py-2.5 text-sm font-semi">
+                                <option value="">2. Pick the Safety Team's thought...</option>
+                                <option value="correct">“We share simple ingredient facts and food safety rules so truth replaces fear.”</option>
+                                <option value="wrong">“We never answer questions from customers.”</option>
+                            </select>
+                            <div id="stk-msg-4" class="hidden p-3 rounded-2xl text-sm font-semi"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t-3 border-[#F0CB91]">
+                    <button onclick="goToScreen(2)" class="pill-btn px-5 py-2.5 bg-[#F0CB91] border-2 border-[#254A6B] text-sm font-semi text-[#000000]">
+                        ← Back to Harm
+                    </button>
+                    <button onclick="goToScreen(4)" class="pill-btn px-6 py-3 bg-[#BD3414] text-[#FFFFFF] text-base font-black-display">
+                        Next: Your Action Plan →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SCREEN 4: REFLECTION ON RESPONSES
+             ================================================================= -->
+        <section id="screen-4" class="game-screen">
+            <div class="retro-card p-6 sm:p-8 space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="inline-flex items-center gap-2 bg-[#254A6B] text-[#FFFFFF] px-4 py-1.5 rounded-xl">
+                        <span class="banner-label text-xs sm:text-sm">STEP 4 OF 4 • YOUR NEXT MOVE</span>
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path d="M12 1L14.8 9.2L23 12L14.8 14.8L12 23L9.2 14.8L1 12L9.2 9.2L12 1Z" fill="#DA9939"/>
+                        </svg>
+                    </div>
+                    <span class="banner-label text-xs px-3.5 py-1.5 rounded-full bg-[#296EB5] text-[#FFFFFF]">
+                        FINAL STEP
+                    </span>
+                </div>
+
+                <div>
+                    <h2 class="font-black-display text-2xl sm:text-4xl text-[#254A6B]">
+                        How can we stop fake news?
+                    </h2>
+                    <p class="font-semi text-lg sm:text-xl text-[#B46B00] mt-1">
+                        Enter your name and answer the 3 short questions below. Tap any Mustard Gold pill to start!
+                    </p>
+                </div>
+
+                <!-- Student Name & Class Bar for Moodle Submission -->
+                <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="student-name" class="banner-label text-xs text-[#254A6B] block mb-1.5">STUDENT NAME (FOR MOODLE)</label>
+                        <input type="text" id="student-name" placeholder="e.g., Alex Chan" class="w-full px-4 py-2.5 text-base font-semi bg-[#F6D7A5] border-3 border-[#254A6B] rounded-2xl text-[#000000]">
+                    </div>
+                    <div>
+                        <label for="student-class" class="banner-label text-xs text-[#254A6B] block mb-1.5">CLASS / GROUP (OPTIONAL)</label>
+                        <input type="text" id="student-class" placeholder="e.g., ENG-101 / Group A" class="w-full px-4 py-2.5 text-base font-semi bg-[#F6D7A5] border-3 border-[#254A6B] rounded-2xl text-[#000000]">
+                    </div>
+                </div>
+
+                <!-- 3 Guided Reflection Prompts -->
+                <div class="space-y-5">
+                    <!-- Reflection 1 -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-3">
+                        <label for="ref-1" class="block">
+                            <span class="banner-label text-xs text-[#BD3414] block">1. YOUR HABIT</span>
+                            <span class="font-black-display text-lg text-[#254A6B]">What will you check before sharing a scary science post?</span>
+                        </label>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="insertStarter('ref-1', 'Before sharing, I will check who wrote the post and search a trusted science site. ')" class="pill-btn px-3.5 py-1.5 bg-[#DA9939] text-[#000000] text-xs font-semi">
+                                + “Check who wrote it...”
+                            </button>
+                            <button type="button" onclick="insertStarter('ref-1', 'I will pause when a headline uses scary words like \'tracking agents\' and read the full story. ')" class="pill-btn px-3.5 py-1.5 bg-[#F6D7A5] border-2 border-[#254A6B] text-[#000000] text-xs font-semi">
+                                + “Pause at scary words...”
+                            </button>
+                        </div>
+                        <textarea id="ref-1" rows="2" placeholder="Write 1–2 simple sentences..." class="w-full p-4 text-base font-med"></textarea>
+                    </div>
+
+                    <!-- Reflection 2 -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-3">
+                        <label for="ref-2" class="block">
+                            <span class="banner-label text-xs text-[#BD3414] block">2. HELPING A FRIEND</span>
+                            <span class="font-black-display text-lg text-[#254A6B]">If a friend shares this soda post in a group chat, what kind reply can you send?</span>
+                        </label>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="insertStarter('ref-2', 'Hey! I checked this—carbon dots are just from heated sugar, not trackers. ')" class="pill-btn px-3.5 py-1.5 bg-[#DA9939] text-[#000000] text-xs font-semi">
+                                + “Share the heated sugar fact...”
+                            </button>
+                            <button type="button" onclick="insertStarter('ref-2', 'I see why that post looks scary, so I checked a fact-check site—it turns out the 2016 study was unrelated. ')" class="pill-btn px-3.5 py-1.5 bg-[#F6D7A5] border-2 border-[#254A6B] text-[#000000] text-xs font-semi">
+                                + “Be kind and share facts...”
+                            </button>
+                        </div>
+                        <textarea id="ref-2" rows="2" placeholder="Write a friendly reply..." class="w-full p-4 text-base font-med"></textarea>
+                    </div>
+
+                    <!-- Reflection 3 -->
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-3">
+                        <label for="ref-3" class="block">
+                            <span class="banner-label text-xs text-[#BD3414] block">3. BIGGER CHANGE</span>
+                            <span class="font-black-display text-lg text-[#254A6B]">What can schools or social apps do to slow down fake news?</span>
+                        </label>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" onclick="insertStarter('ref-3', 'Social apps should add warning labels on fake news sites, and schools should teach fact-checking. ')" class="pill-btn px-3.5 py-1.5 bg-[#DA9939] text-[#000000] text-xs font-semi">
+                                + “Add warning labels...”
+                            </button>
+                            <button type="button" onclick="insertStarter('ref-3', 'Apps can show a \'Read before you share\' pop-up on health posts. ')" class="pill-btn px-3.5 py-1.5 bg-[#F6D7A5] border-2 border-[#254A6B] text-[#000000] text-xs font-semi">
+                                + “Add a \'Read first\' pop-up...”
+                            </button>
+                        </div>
+                        <textarea id="ref-3" rows="2" placeholder="Write one good idea..." class="w-full p-4 text-base font-med"></textarea>
+                    </div>
+                </div>
+
+                <!-- Inline Validation Banner -->
+                <div id="reflection-error" class="hidden p-4 rounded-2xl bg-[#BD3414] text-[#FFFFFF] text-sm font-semi">
+                    Please write a short answer in all 3 boxes before creating your report!
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t-3 border-[#F0CB91]">
+                    <button onclick="goToScreen(3)" class="pill-btn px-5 py-2.5 bg-[#F0CB91] border-2 border-[#254A6B] text-sm font-semi text-[#000000]">
+                        ← Back to Voices
+                    </button>
+                    <button onclick="completeInvestigation()" class="pill-btn px-7 py-3.5 bg-[#BD3414] text-[#FFFFFF] text-base sm:text-lg font-black-display">
+                        Finish &amp; See Report ★
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- =================================================================
+             SCREEN 5: FINAL DETECTIVE REPORT
+             ================================================================= -->
+        <section id="screen-5" class="game-screen">
+            <div class="retro-card p-6 sm:p-10 space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="inline-flex items-center gap-2 bg-[#BD3414] text-[#FFFFFF] px-4 py-1.5 rounded-xl">
+                        <span class="banner-label text-xs sm:text-sm">CASE SOLVED • DETECTIVE REPORT</span>
+                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                            <path d="M12 1L14.8 9.2L23 12L14.8 14.8L12 23L9.2 14.8L1 12L9.2 9.2L12 1Z" fill="#DA9939"/>
+                        </svg>
+                    </div>
+                    <span class="banner-label text-sm px-4 py-1.5 rounded-full bg-[#254A6B] text-[#FFFFFF]" id="final-rank-badge">
+                        MASTER FACT-CHECKER
+                    </span>
+                </div>
+
+                <div class="flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                        <h2 class="font-black-display text-3xl sm:text-5xl text-[#BD3414]">
+                            Great job, Detective!
+                        </h2>
+                        <p class="font-semi text-lg sm:text-xl text-[#B46B00] mt-1">
+                            Case #2026: Coke &amp; Pepsi “Tracking Dots” Fake News
+                        </p>
+                        <p class="font-semi text-sm text-[#254A6B] mt-1" id="summary-student-info"></p>
+                    </div>
+                    <div class="bg-[#DA9939] border-3 border-[#254A6B] rounded-2xl px-5 py-3 text-center">
+                        <span class="banner-label text-xs text-[#000000] block">TOTAL SCORE</span>
+                        <span class="font-black-display text-3xl text-[#254A6B]" id="final-score-big">0 PTS</span>
+                    </div>
+                </div>
+
+                <!-- Summary Stats Pills -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-2xl p-4">
+                        <span class="banner-label text-xs text-[#254A6B] block">CLUES FOUND</span>
+                        <span class="font-black-display text-2xl text-[#296EB5]" id="stat-clues">0 / 4</span>
+                    </div>
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-2xl p-4">
+                        <span class="banner-label text-xs text-[#254A6B] block">HARMS SPOTTED</span>
+                        <span class="font-black-display text-2xl text-[#296EB5]" id="stat-harms">0 / 4</span>
+                    </div>
+                    <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-2xl p-4">
+                        <span class="banner-label text-xs text-[#254A6B] block">VOICES MATCHED</span>
+                        <span class="font-black-display text-2xl text-[#296EB5]" id="stat-voices">0 / 4</span>
+                    </div>
+                </div>
+
+                <!-- Key Evidence & Stakeholder Takeaways -->
+                <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-2">
+                    <span class="banner-label text-xs text-[#254A6B] block">WHAT WE LEARNED</span>
+                    <p class="font-med text-base text-[#000000]">
+                        <strong>The Truth:</strong> Tiny carbon dots form naturally when sugar is heated in everyday foods and drinks—they are not GPS “tracking agents.” Putting two unrelated facts together with a red arrow is a classic clickbait trick.
+                    </p>
+                </div>
+
+                <!-- Student's Own Reflection Answers -->
+                <div class="bg-[#F0CB91] border-3 border-[#254A6B] rounded-3xl p-5 space-y-4">
+                    <span class="banner-label text-xs text-[#BD3414] block">YOUR ACTION PLAN</span>
+                    <div>
+                        <p class="font-black-display text-sm text-[#254A6B]">1. Before Sharing:</p>
+                        <p class="font-med text-base text-[#000000] mt-0.5" id="summary-ref-1"></p>
+                    </div>
+                    <div>
+                        <p class="font-black-display text-sm text-[#254A6B]">2. Reply to a Friend:</p>
+                        <p class="font-med text-base text-[#000000] mt-0.5" id="summary-ref-2"></p>
+                    </div>
+                    <div>
+                        <p class="font-black-display text-sm text-[#254A6B]">3. School &amp; App Ideas:</p>
+                        <p class="font-med text-base text-[#000000] mt-0.5" id="summary-ref-3"></p>
+                    </div>
+                </div>
+
+                <!-- Export / Copy / Replay Actions -->
+                <div class="no-print flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <div class="flex flex-wrap gap-3">
+                        <button onclick="copyDossier()" class="pill-btn px-5 py-3 bg-[#296EB5] text-[#FFFFFF] text-sm font-semi">
+                            Copy Report Text
+                        </button>
+                        <button onclick="window.print()" class="pill-btn px-5 py-3 bg-[#DA9939] text-[#000000] border-2 border-[#254A6B] text-sm font-semi">
+                            Print / Save PDF
+                        </button>
+                    </div>
+                    <button onclick="resetGame()" class="pill-btn px-5 py-3 bg-[#F0CB91] border-2 border-[#254A6B] text-sm font-semi text-[#000000]">
+                        Play Again ↺
+                    </button>
+                </div>
+
+                <div id="copy-toast" class="hidden p-3 rounded-2xl bg-[#254A6B] text-[#FFFFFF] text-sm font-semi text-center">
+                    Report copied! You can paste it into your homework now.
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- =====================================================================
+         PHOTO ZOOM MODAL
+         ===================================================================== -->
+    <div id="evidence-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#254A6B]/80" onclick="closeEvidenceModal(event)">
+        <div class="bg-[#F6D7A5] border-4 border-[#254A6B] rounded-3xl max-w-2xl w-full p-4 sm:p-6 space-y-4 shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between gap-3">
+                <span id="modal-caption" class="banner-label text-xs sm:text-sm text-[#254A6B]">PHOTO PREVIEW</span>
+                <button onclick="closeEvidenceModal()" class="pill-btn px-4 py-1.5 bg-[#BD3414] text-[#FFFFFF] banner-label text-xs">
+                    CLOSE ✕
+                </button>
+            </div>
+            <div class="rounded-2xl overflow-hidden border-3 border-[#254A6B] bg-[#FFFFFF] max-h-[72vh] overflow-y-auto">
+                <img id="modal-img" src="" alt="Zoomed photo" class="w-full h-auto block">
+                <div id="modal-details-box" class="p-4 bg-[#F0CB91] border-t-3 border-[#254A6B] text-sm font-semi text-[#000000]"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         JAVASCRIPT LOGIC & SOUND ENGINE
+         ===================================================================== -->
+    <script>
+        // =================================================================
+        // GLOBAL GAME STATE, NAVIGATION & SOUND ENGINE
+        // =================================================================
+        const state = {
+            currentScreen: 0,
+            score: 0,
+            soundOn: true,
+            cluesFound: new Set(),
+            stage1QuizDone: false,
+            harmsSolved: new Set(),
+            stakeholdersSolved: new Set(),
+            uploadedPhotos: {
+                a: null,
+                b: null
+            }
+        };
+
+        let audioCtx = null;
+
+        function playChime(type) {
+            if (!state.soundOn) return;
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContextClass) audioCtx = new AudioContextClass();
+                }
+                if (!audioCtx) return;
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+                if (type === 'good') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.09);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.26);
+                } else if (type === 'bad') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(210, now);
+                    osc.frequency.linearRampToValueAtTime(160, now + 0.18);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.21);
+                } else {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    gain.gain.setValueAtTime(0.06, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                }
+            } catch (e) {
+                // Ignore audio errors if blocked by browser
+            }
+        }
+
+        function toggleSound() {
+            state.soundOn = !state.soundOn;
+            const btn = document.getElementById('sound-btn');
+            if (btn) {
+                btn.textContent = state.soundOn ? 'SFX: ON' : 'SFX: OFF';
+            }
+            if (state.soundOn) playChime('tap');
+        }
+
+        function addScore(points) {
+            state.score += points;
+            const hud = document.getElementById('hud-score');
+            if (hud) hud.textContent = `${state.score} PTS`;
+        }
+
+        function goToScreen(num) {
+            state.currentScreen = num;
+            document.querySelectorAll('.game-screen').forEach((el, idx) => {
+                if (idx === num) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+
+            // Highlight active step pill in top HUD
+            for (let i = 1; i <= 4; i++) {
+                const pill = document.getElementById(`nav-pill-${i}`);
+                if (!pill) continue;
+                if (i === num) {
+                    pill.style.backgroundColor = '#254A6B';
+                    pill.style.color = '#FFFFFF';
+                } else {
+                    pill.style.backgroundColor = '#F6D7A5';
+                    pill.style.color = '#254A6B';
+                }
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function startGame() {
+            playChime('tap');
+            goToScreen(1);
+        }
+
+        const DEFAULT_PHOTO_INFO = {
+            a: {
+                src: 'https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=900&q=85',
+                caption: 'PHOTO A • ARTICLE SCREENSHOT',
+                details: 'Headline: "Scientists Find Microscopic ‘Tracking Agents’ in Coke and Pepsi—and Paper Trail Leads to Gates Foundation." Notice the fake self-awarded "Fact checked by The People\'s Voice" badge.'
+            },
+            b: {
+                src: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=900&q=85',
+                caption: 'PHOTO B • VIRAL X POST (ILLUSTRATION)',
+                details: 'The post links 2016 carbon nanodot research to a 2018 study of Coke & Pepsi, using a red arrow to connect two unrelated studies.'
+            }
+        };
+
+        function activateLocalImage(slot, filename) {
+            if (typeof state !== 'undefined' && state.uploadedPhotos) {
+                state.uploadedPhotos[slot] = filename;
+            }
+            const imgEl = document.getElementById(`img-slot-${slot}`);
+            const mockupEl = document.getElementById(`default-mockup-${slot}`);
+            if (imgEl) imgEl.classList.remove('hidden');
+            if (mockupEl) mockupEl.classList.add('hidden');
+            if (slot === 'a') {
+                const homeImg = document.getElementById('home-preview-img');
+                const homeMockup = document.getElementById('home-default-mockup');
+                if (homeImg) {
+                    homeImg.src = filename;
+                    homeImg.classList.remove('hidden');
+                }
+                if (homeMockup) homeMockup.classList.add('hidden');
+            }
+        }
+
+        // Try .jpeg, .png, and uppercase .JPG automatically before showing fallback mockup
+        function tryFallbackExt(imgEl, baseName, slot) {
+            const attempts = parseInt(imgEl.dataset.attempts || '0', 10);
+            const candidates = [
+                `./${baseName}.jpeg`,
+                `./${baseName}.png`,
+                `./${baseName}.JPG`,
+                `./${baseName}.PNG`
+            ];
+            if (attempts < candidates.length) {
+                imgEl.dataset.attempts = String(attempts + 1);
+                imgEl.src = candidates[attempts];
+            } else {
+                imgEl.classList.add('hidden');
+                if (slot === 'home') {
+                    const homeMockup = document.getElementById('home-default-mockup');
+                    if (homeMockup) homeMockup.classList.remove('hidden');
+                } else {
+                    const mockupEl = document.getElementById(`default-mockup-${slot}`);
+                    if (mockupEl) mockupEl.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Sync already-loaded local images on window load
+        window.addEventListener('DOMContentLoaded', () => {
+            ['a', 'b'].forEach(slot => {
+                const imgEl = document.getElementById(`img-slot-${slot}`);
+                if (imgEl && imgEl.complete && imgEl.naturalWidth > 0) {
+                    activateLocalImage(slot, imgEl.currentSrc || imgEl.src);
+                }
+            });
+        });
+
+        function handleSlotClick(slot) {
+            const imgEl = document.getElementById(`img-slot-${slot}`);
+            const hasRealImg = imgEl && !imgEl.classList.contains('hidden') && imgEl.naturalWidth > 0;
+            const existing = state.uploadedPhotos[slot] || (hasRealImg ? (imgEl.currentSrc || imgEl.src) : null);
+            const info = DEFAULT_PHOTO_INFO[slot];
+            if (existing) {
+                const label = slot === 'a' ? 'PHOTO A • ARTICLE SCREENSHOT' : 'PHOTO B • X POST SCREENSHOT';
+                openEvidenceModal(existing, label, info.details);
+            } else {
+                openEvidenceModal(info.src, info.caption, info.details);
+            }
+        }
+
+        function openEvidenceModal(imgSrc, captionText, detailsText) {
+            const modal = document.getElementById('evidence-modal');
+            const modalImg = document.getElementById('modal-img');
+            const modalCaption = document.getElementById('modal-caption');
+            const modalDetails = document.getElementById('modal-details-box');
+            if (!modal || !modalImg || !modalCaption) return;
+
+            modalImg.src = imgSrc;
+            modalCaption.textContent = captionText;
+            if (modalDetails) {
+                modalDetails.textContent = detailsText || '';
+            }
+            modal.classList.remove('hidden');
+            playChime('tap');
+        }
+
+        function closeEvidenceModal(event) {
+            if (event && event.target && event.target.id !== 'evidence-modal') return;
+            const modal = document.getElementById('evidence-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // =================================================================
+        // STAGE 1: CLUE HUNT DATA & INTERACTION
+        // =================================================================
+        const CLUE_DATA = {
+            1: {
+                title: "Clue #1: “Tracking Agents”",
+                text: "FAKE CLAIM: Calling tiny carbon particles 'tracking agents' makes people scared. They are just carbon—not GPS chips or trackers."
+            },
+            2: {
+                title: "Clue #2: “2016 → 2018 Red Arrow”",
+                text: "FALSE LINK: The big red arrow connects a 2016 medical grant to a 2018 soda study, even though they have nothing to do with each other."
+            },
+            3: {
+                title: "Clue #3: “Fake Fact-Check Badge”",
+                text: "FAKE TRUST: The website put its own 'Fact checked by The People's Voice' badge on its own story! Real fact-checks come from independent groups."
+            },
+            4: {
+                title: "Clue #4: “Heated Sugar Note”",
+                text: "HIDDEN TRUTH: The study's own text says these tiny carbon dots form naturally when sugar and caramel are heated—just like in toast or coffee!"
+            }
+        };
+
+        function revealClue(id) {
+            const data = CLUE_DATA[id];
+            if (!data) return;
+
+            document.getElementById('clue-title').textContent = data.title;
+            document.getElementById('clue-explanation').textContent = data.text;
+
+            const btn = document.getElementById(`clue-btn-${id}`);
+            const hotspot = document.getElementById(`hotspot-${id}`);
+            if (hotspot) hotspot.classList.add('found');
+
+            if (btn && !state.cluesFound.has(id)) {
+                state.cluesFound.add(id);
+                btn.classList.add('found');
+                addScore(25);
+                playChime('good');
+            } else {
+                playChime('tap');
+            }
+
+            document.getElementById('clue-counter').textContent = `${state.cluesFound.size} / 4 CLUES FOUND`;
+        }
+
+        function checkStage1Quiz(btnEl, isCorrect) {
+            const feedback = document.getElementById('stage1-quiz-feedback');
+            feedback.classList.remove('hidden');
+
+            if (isCorrect) {
+                btnEl.style.backgroundColor = '#296EB5';
+                btnEl.style.color = '#FFFFFF';
+                feedback.style.backgroundColor = '#254A6B';
+                feedback.style.color = '#FFFFFF';
+                feedback.textContent = "Correct! Heated sugar and caramel create tiny carbon dots in many everyday foods.";
+                if (!state.stage1QuizDone) {
+                    state.stage1QuizDone = true;
+                    addScore(50);
+                }
+                playChime('good');
+            } else {
+                btnEl.style.backgroundColor = '#BD3414';
+                btnEl.style.color = '#FFFFFF';
+                feedback.style.backgroundColor = '#BD3414';
+                feedback.style.color = '#FFFFFF';
+                feedback.textContent = "Not quite! Check Clue #4 to see how heated sugar makes carbon dots.";
+                playChime('bad');
+            }
+        }
+
+        // =================================================================
+        // STAGE 2: ASSESS POTENTIAL HARM
+        // =================================================================
+        const HARM_ANSWERS = {
+            1: {
+                type: 'science',
+                sev: 'high',
+                good: "Right! Mixing up normal food science with tracking tech makes people afraid of everyday science."
+            },
+            2: {
+                type: 'brand',
+                sev: 'high',
+                good: "Right! Viral rumors cause panic and make people waste good food and drinks."
+            },
+            3: {
+                type: 'harassment',
+                sev: 'high',
+                good: "Right! Conspiracy posts often lead to angry messages and online bullying."
+            },
+            4: {
+                type: 'media',
+                sev: 'high',
+                good: "Right! Mixing half-truths with lies makes it harder for everyone to trust real news."
+            }
+        };
+
+        function checkHarmItem(id) {
+            const typeVal = document.getElementById(`harm-type-${id}`).value;
+            const sevVal = document.getElementById(`harm-sev-${id}`).value;
+            const msg = document.getElementById(`harm-msg-${id}`);
+
+            if (!typeVal || !sevVal) return;
+
+            msg.classList.remove('hidden');
+            const target = HARM_ANSWERS[id];
+
+            if (typeVal === target.type && sevVal === target.sev) {
+                msg.style.backgroundColor = '#296EB5';
+                msg.style.color = '#FFFFFF';
+                msg.textContent = target.good;
+                if (!state.harmsSolved.has(id)) {
+                    state.harmsSolved.add(id);
+                    addScore(35);
+                    playChime('good');
+                }
+            } else {
+                msg.style.backgroundColor = '#BD3414';
+                msg.style.color = '#FFFFFF';
+                msg.textContent = "Try again! Read the quote closely and pick the matching harm and high impact.";
+                playChime('bad');
+            }
+
+            document.getElementById('harm-counter').textContent = `${state.harmsSolved.size} / 4 HARMS SOLVED`;
+        }
+
+        // =================================================================
+        // STAGE 3: STAKEHOLDER PERSPECTIVES
+        // =================================================================
+        const STAKEHOLDER_ANSWERS = {
+            1: {
+                goal: 'health',
+                quote: 'correct',
+                good: "Great job! Everyday users like Maya share scary posts because they want to keep friends safe."
+            },
+            2: {
+                goal: 'attention',
+                quote: 'correct',
+                good: "Great job! Clickbait writers use big brands and scary words to get fast clicks and shares."
+            },
+            3: {
+                goal: 'accuracy',
+                quote: 'correct',
+                good: "Great job! Scientists check the facts and explain that heated sugar makes harmless carbon dots."
+            },
+            4: {
+                goal: 'trust',
+                quote: 'correct',
+                good: "Great job! The Safety Team shares simple facts so truth replaces fear."
+            }
+        };
+
+        function checkStakeholder(id) {
+            const goalVal = document.getElementById(`stk-goal-${id}`).value;
+            const quoteVal = document.getElementById(`stk-quote-${id}`).value;
+            const msg = document.getElementById(`stk-msg-${id}`);
+
+            if (!goalVal || !quoteVal) return;
+
+            msg.classList.remove('hidden');
+            const target = STAKEHOLDER_ANSWERS[id];
+
+            if (goalVal === target.goal && quoteVal === target.quote) {
+                msg.style.backgroundColor = '#254A6B';
+                msg.style.color = '#FFFFFF';
+                msg.textContent = target.good;
+                if (!state.stakeholdersSolved.has(id)) {
+                    state.stakeholdersSolved.add(id);
+                    addScore(35);
+                    playChime('good');
+                }
+            } else {
+                msg.style.backgroundColor = '#BD3414';
+                msg.style.color = '#FFFFFF';
+                msg.textContent = "Not quite! Think about what this person cares about most.";
+                playChime('bad');
+            }
+
+            document.getElementById('stakeholder-counter').textContent = `${state.stakeholdersSolved.size} / 4 VOICES MATCHED`;
+        }
+
+        // =================================================================
+        // STAGE 4: REFLECTION & FINAL DOSSIER
+        // =================================================================
+        function insertStarter(textareaId, text) {
+            const el = document.getElementById(textareaId);
+            if (!el) return;
+            if (!el.value.includes(text.trim())) {
+                el.value = (el.value ? el.value.trim() + ' ' : '') + text;
+            }
+            el.focus();
+            playChime('tap');
+        }
+
+        function completeInvestigation() {
+            const r1 = document.getElementById('ref-1').value.trim();
+            const r2 = document.getElementById('ref-2').value.trim();
+            const r3 = document.getElementById('ref-3').value.trim();
+            const studentName = (document.getElementById('student-name')?.value || '').trim() || 'Student Detective';
+            const studentClass = (document.getElementById('student-class')?.value || '').trim();
+            const errBox = document.getElementById('reflection-error');
+
+            if (!r1 || !r2 || !r3) {
+                errBox.classList.remove('hidden');
+                playChime('bad');
+                return;
+            }
+
+            errBox.classList.add('hidden');
+            addScore(70);
+            playChime('good');
+
+            // Populate Final Summary Screen
+            const studentInfoEl = document.getElementById('summary-student-info');
+            if (studentInfoEl) {
+                studentInfoEl.textContent = studentClass
+                    ? `Student: ${studentName} (${studentClass})`
+                    : `Student: ${studentName}`;
+            }
+
+            document.getElementById('final-score-big').textContent = `${state.score} PTS`;
+            document.getElementById('stat-clues').textContent = `${state.cluesFound.size} / 4`;
+            document.getElementById('stat-harms').textContent = `${state.harmsSolved.size} / 4`;
+            document.getElementById('stat-voices').textContent = `${state.stakeholdersSolved.size} / 4`;
+
+            const rankBadge = document.getElementById('final-rank-badge');
+            if (state.score >= 420) {
+                rankBadge.textContent = 'MASTER FACT-CHECKER';
+            } else if (state.score >= 250) {
+                rankBadge.textContent = 'SENIOR MEDIA DETECTIVE';
+            } else {
+                rankBadge.textContent = 'JUNIOR FACT-CHECKER';
+            }
+
+            document.getElementById('summary-ref-1').textContent = r1;
+            document.getElementById('summary-ref-2').textContent = r2;
+            document.getElementById('summary-ref-3').textContent = r3;
+
+            goToScreen(5);
+        }
+
+        function copyDossier() {
+            const studentLine = document.getElementById('summary-student-info')?.textContent || '';
+            const r1 = document.getElementById('summary-ref-1').textContent;
+            const r2 = document.getElementById('summary-ref-2').textContent;
+            const r3 = document.getElementById('summary-ref-3').textContent;
+
+            const reportText = [
+                "FACT-CHECK DETECTIVE REPORT — CASE #2026",
+                studentLine,
+                `Score: ${state.score} PTS | Clues: ${state.cluesFound.size}/4 | Harms: ${state.harmsSolved.size}/4 | Voices: ${state.stakeholdersSolved.size}/4`,
+                "",
+                "What We Learned:",
+                "Tiny carbon dots form naturally when sugar is heated in everyday foods and drinks—they are not GPS tracking agents.",
+                "",
+                "My Action Plan:",
+                `1. Before Sharing: ${r1}`,
+                `2. Reply to a Friend: ${r2}`,
+                `3. School & App Ideas: ${r3}`
+            ].filter(Boolean).join("\n");
+
+            const tempArea = document.createElement('textarea');
+            tempArea.value = reportText;
+            document.body.appendChild(tempArea);
+            tempArea.select();
+            try {
+                document.execCommand('copy');
+                const toast = document.getElementById('copy-toast');
+                toast.classList.remove('hidden');
+                playChime('good');
+                setTimeout(() => toast.classList.add('hidden'), 3500);
+            } catch (e) {
+                // Ignore copy errors
+            }
+            document.body.removeChild(tempArea);
+        }
+
+        function resetGame() {
+            state.score = 0;
+            state.cluesFound.clear();
+            state.stage1QuizDone = false;
+            state.harmsSolved.clear();
+            state.stakeholdersSolved.clear();
+
+            document.getElementById('hud-score').textContent = '0 PTS';
+            document.getElementById('clue-counter').textContent = '0 / 4 CLUES FOUND';
+            document.getElementById('harm-counter').textContent = '0 / 4 HARMS SOLVED';
+            document.getElementById('stakeholder-counter').textContent = '0 / 4 VOICES MATCHED';
+
+            document.querySelectorAll('.clue-target').forEach(btn => btn.classList.remove('found'));
+            document.querySelectorAll('.plus-hotspot').forEach(btn => btn.classList.remove('found'));
+            document.getElementById('clue-title').textContent = 'Click any “+” button on the news!';
+            document.getElementById('clue-explanation').textContent = 'Click the “+” buttons on Photo A or Photo B to check what is true and what is misleading.';
+
+            document.querySelectorAll('#stage1-quiz-options button').forEach(btn => {
+                btn.style.backgroundColor = '#F6D7A5';
+                btn.style.color = '#000000';
+            });
+            document.getElementById('stage1-quiz-feedback').classList.add('hidden');
+
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`harm-type-${i}`).value = '';
+                document.getElementById(`harm-sev-${i}`).value = '';
+                document.getElementById(`harm-msg-${i}`).classList.add('hidden');
+
+                document.getElementById(`stk-goal-${i}`).value = '';
+                document.getElementById(`stk-quote-${i}`).value = '';
+                document.getElementById(`stk-msg-${i}`).classList.add('hidden');
+            }
+
+            document.getElementById('ref-1').value = '';
+            document.getElementById('ref-2').value = '';
+            document.getElementById('ref-3').value = '';
+
+            goToScreen(0);
+        }
+    </script>
+</body>
+</html>

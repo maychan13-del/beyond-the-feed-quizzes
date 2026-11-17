@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fact-Check Detective</title>
+<style>
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; }
+  #stage { position: absolute; top: 0; left: 0; width: 1280px; height: 720px; transform-origin: 0 0; }
+  #stage iframe { width: 1280px; height: 720px; border: 0; display: block; }
+</style>
+</head>
+<body>
+<div id="stage"><iframe src="sift-detective-game.html" title="Fact-Check Detective" allowfullscreen></iframe></div>
+<script>
+  function fit() {
+    var W = window.innerWidth, H = window.innerHeight;
+    var s = Math.min(W / 1280, H / 720);
+    var st = document.getElementById('stage');
+    st.style.transform = 'scale(' + s + ')';
+    st.style.left = ((W - 1280 * s) / 2) + 'px';
+    st.style.top = ((H - 720 * s) / 2) + 'px';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+</script>
+</body>
+</html>
